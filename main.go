@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
-	. "github.com/kkdai/tm"
+	"fmt" // stands for the Format package
+	// . "github.com/kkdai/tm"
 )
 
 func main() {
