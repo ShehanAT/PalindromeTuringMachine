@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt" // stands for the Format package
-	. "https://github.com/ShehanAT/TuringMachine"
+	. "github.com/ShehanAT/TuringMachine/turing_machine"
 	// "turing_machine"
 )
 
 func main() {
-	nTM := NewTM()
+	nTM := NewTuringMachine()
 
 	// Input State and declare if it is a final state
 	nTM.InputState("0", false)

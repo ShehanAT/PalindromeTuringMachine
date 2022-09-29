@@ -5,8 +5,9 @@ const (
 	MoveRight = iota // 1 
 )
 
-func NewTuringMachine *TM {
-	newTuringMachine := new(TM)
+
+func NewTuringMachine() *TuringMachine {
+	newTuringMachine := new(TuringMachine)
 	newTuringMachine.States = make(map[string]bool)
 	newTuringMachine.FinalStates = make(map[string]bool)
 	newTuringMachine.Inputs = make(map[string]bool)
@@ -15,14 +16,14 @@ func NewTuringMachine *TM {
 }
 
 type ConfigIn struct {
-	SrcState string 
-	Input string 
+	SrcState string
+	Input    string
 }
 
 type ConfigOut struct {
-	DstState string 
-	ModifiedVal string 
-	TapeMove int 
+	DstState    string
+	ModifiedVal string
+	TapeMove    int
 }
 
 type TuringMachine struct {
@@ -30,12 +31,12 @@ type TuringMachine struct {
 	States map[string]bool 
 	FinalStates map[string]bool 
 	Inputs map[string]bool 
-	Configs map[string]ConfigOut 
+	Configs map[ConfigIn]ConfigOut 
 	CurrentState string 
 }
 
 // Input State and declare if it is in the final state 
-func (t *TM) InputState(state string, isFinal bool){
+func (t *TuringMachine) InputState(state string, isFinal bool){
 	// First input state will be initial state
 	if t.CurrentState == "" {
 		t.CurrentState = state 
@@ -49,7 +50,7 @@ func (t *TM) InputState(state string, isFinal bool){
 }
 
 // Input Turing Machine Tape Data 
-func (t *TM) InputTape(tracks ...string){
+func (t *TuringMachine) InputTape(tracks ...string){
 	newTape := NewTape(tracks)
 	t.Input = newTape 
 }
@@ -61,7 +62,7 @@ func (t *TM) InputTape(tracks ...string){
 // - Modified Value 
 // - DestinationState 
 // - Tape Head Move Direction 
-func (t *TM) InputConfig(srcState, string, input string, modifiedVal string, dstState string, tapeMove int){
+func (t *TuringMachine) InputConfig(srcState string, input string, modifiedVal string, dstState string, tapeMove int){
 	// Check state 
 	if _, exist := t.States[srcState]; !exist {
 		return 
@@ -72,7 +73,7 @@ func (t *TM) InputConfig(srcState, string, input string, modifiedVal string, dst
 	}
 
 	// Add Input 
-	t.Input[input] = true 
+	t.Inputs[input] = true 
 
 	newConfigIn := ConfigIn{SrcState: srcState, Input: input}
 	newConfigOut := ConfigOut { ModifiedVal: modifiedVal, TapeMove: tapeMove, DstState: dstState}
@@ -99,7 +100,7 @@ func (t *TuringMachine) Step() bool {
 }
 
 // Run Turing Machine all tape data to the end 
-func (t *TM) Run() bool {
+func (t *TuringMachine) Run() bool {
 	var latestResult bool 
 	for !t.Input.EndInput() {
 		// fmt.Println("run index=", t.Input.Head)
@@ -109,7 +110,7 @@ func (t *TM) Run() bool {
 	return latestResult
 }
 
-func (t *TM) ExportTape() []string {
+func (t *TuringMachine) ExportTape() []string {
 	return t.Input.Symbol 
 }
 
