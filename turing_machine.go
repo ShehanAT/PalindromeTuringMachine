@@ -79,8 +79,39 @@ func (t *TM) InputConfig(srcState, string, input string, modifiedVal string, dst
 	t.Configs[newConfigIn] = newConfigOut 
 }
 
+// Step will read a input and run single step. It will return true if it is accept. 
+func (t *TuringMachine) Step() bool {
+	input := t.Input.ReadSymbol()
+	inConfig := ConfigIn{SrcState: t.CurrentState, Input: input}
 
+	if newOut, exist:= t.Configs[inConfig]; !exist {
+		return false 
+	} else {
+		t.Input.DoOption(newOut.ModifiedVal, newOut.TapeMove == MoveRight)
+		t.CurrentState = newOut.DstState
+	}
 
+	if _, exist := t.FinalStates[t.CurrentState]; exist {
+		return true 
+	}
+
+	return false 
+}
+
+// Run Turing Machine all tape data to the end 
+func (t *TM) Run() bool {
+	var latestResult bool 
+	for !t.Input.EndInput() {
+		// fmt.Println("run index=", t.Input.Head)
+		latestResult = t.Step()
+	}
+
+	return latestResult
+}
+
+func (t *TM) ExportTape() []string {
+	return t.Input.Symbol 
+}
 
 
 
