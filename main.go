@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt" // stands for the Format package
-	// . "github.com/kkdai/tm"
+	. "https://github.com/ShehanAT/TuringMachine"
+	// "turing_machine"
 )
 
 func main() {
