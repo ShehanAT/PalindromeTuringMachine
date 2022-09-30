@@ -1,4 +1,4 @@
-package astilectron
+package turing_machine
 
 import (
 	"log"
