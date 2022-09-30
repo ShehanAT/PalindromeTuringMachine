@@ -30,8 +30,7 @@ func main() {
 	nTM.InputConfig("1", "1", "1", "1", MoveRight)
 
 	//Input tape data
-	nTM.InputTape(args[0], args[1], args[2])
-	// nTM.InputTape("0", "0", "1", "1", "0", "0", "0")
+	nTM.InputTape(args[1:]...)
 
 	//Run TM to the finish (if exist)
 	nTM.Run()
