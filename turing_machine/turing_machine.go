@@ -1,18 +1,23 @@
-package turing_machine 
+package turing_machine
 
-const (
-	MoveLeft = iota // 0 
-	MoveRight = iota // 1 
+// import (
+// 	"fmt" // stands for the Format package
+// 	// "reflect"
+// )
+
+
+const ( // iota is reset to 0
+	MoveLeft  = iota //0
+	MoveRight = iota //1
 )
 
-
-func NewTuringMachine() *TuringMachine {
-	newTuringMachine := new(TuringMachine)
-	newTuringMachine.States = make(map[string]bool)
-	newTuringMachine.FinalStates = make(map[string]bool)
-	newTuringMachine.Inputs = make(map[string]bool)
-	newTuringMachine.Configs = make(map[ConfigIn]ConfigOut)
-	return newTuringMachine
+func NewTM() *TM {
+	newTM := new(TM)
+	newTM.States = make(map[string]bool)
+	newTM.FinalStates = make(map[string]bool)
+	newTM.Inputs = make(map[string]bool)
+	newTM.Configs = make(map[ConfigIn]ConfigOut)
+	return newTM
 }
 
 type ConfigIn struct {
@@ -26,95 +31,92 @@ type ConfigOut struct {
 	TapeMove    int
 }
 
-type TuringMachine struct {
-	Input *Tape 
-	States map[string]bool 
-	FinalStates map[string]bool 
-	Inputs map[string]bool 
-	Configs map[ConfigIn]ConfigOut 
-	CurrentState string 
+type TM struct {
+	Input        *Tape
+	States       map[string]bool
+	FinalStates  map[string]bool
+	Inputs       map[string]bool
+	Configs      map[ConfigIn]ConfigOut
+	CurrentState string
 }
 
-// Input State and declare if it is in the final state 
-func (t *TuringMachine) InputState(state string, isFinal bool){
-	// First input state will be initial state
+// Input State and declare if it is final state
+func (t *TM) InputState(state string, isFinal bool) {
+	//First input state will be init state
 	if t.CurrentState == "" {
-		t.CurrentState = state 
+		t.CurrentState = state
 	}
 
-	// Add newState
-	t.States[state] = true 
+	//Add newState
+	t.States[state] = true
 	if isFinal {
-		t.FinalStates[state] = true 
+		t.FinalStates[state] = true
 	}
 }
 
-// Input Turing Machine Tape Data 
-func (t *TuringMachine) InputTape(tracks ...string){
+// Input turing machine tape data
+func (t *TM) InputTape(tracks ...string) {
+	// fmt.Printf("%T\n", tracks)
 	newTape := NewTape(tracks)
-	t.Input = newTape 
+	t.Input = newTape
 }
 
-// Input Config
-// InputConfig parameter as follows:
-// - SourceState
-// - Input 
-// - Modified Value 
-// - DestinationState 
-// - Tape Head Move Direction 
-func (t *TuringMachine) InputConfig(srcState string, input string, modifiedVal string, dstState string, tapeMove int){
-	// Check state 
+//Input config
+// InputConfig parameter as follow:
+// - SourceState,
+// - Input
+// - Modified Value
+// - DestinationState
+// - Tape Head Move Direction
+func (t *TM) InputConfig(srcState string, input string, modifiedVal string, dstState string, tapeMove int) {
+	//Check state
 	if _, exist := t.States[srcState]; !exist {
-		return 
+		return
 	}
 
 	if _, exist := t.States[dstState]; !exist {
-		return 
+		return
 	}
 
-	// Add Input 
-	t.Inputs[input] = true 
+	//Add Input
+	t.Inputs[input] = true
 
+	//Add config
 	newConfigIn := ConfigIn{SrcState: srcState, Input: input}
-	newConfigOut := ConfigOut { ModifiedVal: modifiedVal, TapeMove: tapeMove, DstState: dstState}
-	t.Configs[newConfigIn] = newConfigOut 
+	newConfigOut := ConfigOut{ModifiedVal: modifiedVal, TapeMove: tapeMove, DstState: dstState}
+	t.Configs[newConfigIn] = newConfigOut
 }
 
-// Step will read a input and run single step. It will return true if it is accept. 
-func (t *TuringMachine) Step() bool {
+// Step will read a input and run single step, return if it is accept
+func (t *TM) Step() bool {
 	input := t.Input.ReadSymbol()
 	inConfig := ConfigIn{SrcState: t.CurrentState, Input: input}
 
-	if newOut, exist:= t.Configs[inConfig]; !exist {
-		return false 
+	// fmt.Println("input: ", input)
+	if newOut, exist := t.Configs[inConfig]; !exist {
+		return false
 	} else {
 		t.Input.DoOption(newOut.ModifiedVal, newOut.TapeMove == MoveRight)
 		t.CurrentState = newOut.DstState
 	}
 
 	if _, exist := t.FinalStates[t.CurrentState]; exist {
-		return true 
+		return true
 	}
 
-	return false 
+	return false
 }
 
-// Run Turing Machine all tape data to the end 
-func (t *TuringMachine) Run() bool {
-	var latestResult bool 
+// Run turing machine all tape data to the end
+func (t *TM) Run() bool {
+	var latestResult bool
 	for !t.Input.EndInput() {
-		// fmt.Println("run index=", t.Input.Head)
+		//fmt.Println("run  index=", t.Input.Head)
 		latestResult = t.Step()
 	}
-
 	return latestResult
 }
 
-func (t *TuringMachine) ExportTape() []string {
-	return t.Input.Symbol 
+func (t *TM) ExportTape() []string {
+	return t.Input.Symbol
 }
-
-
-
-
-

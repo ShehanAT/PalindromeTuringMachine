@@ -1,5 +1,9 @@
 package turing_machine 
 
+// import (
+// 	"fmt" // stands for the Format package
+// )
+
 type Tape struct {
 	Symbol []string 
 	Head int 
@@ -37,6 +41,7 @@ func (t *Tape) EndInput() bool {
 
 // Read one symbol from tape 
 func (t *Tape) ReadSymbol() string {
+	// fmt.Println("t.Head: ", t.Head, "t.Symbol: ", t.Symbol)
 	return t.Symbol[t.Head]
 }
 
