@@ -1,7 +1,7 @@
 var os = require('os');
 var child;
 var fails = 0;
-var goBinary = "./new_folder.exe"; //or template.exe
+var goBinary = "./gowd_gui.exe"; //or template.exe
 
 function setPage(html) {
     const container = document.getElementById("app");

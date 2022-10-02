@@ -9,14 +9,16 @@ require (
 
 require (
 	github.com/AllenDang/w32 v0.0.0-20180428130237-ad0a36d80adc // indirect
+	github.com/dtylman/gowd v0.0.0-20220807062529-4271bc0536b7 // indirect
 	github.com/gonutz/w32/v2 v2.5.0 // indirect
 	github.com/vmihailenco/gforms v0.0.0-20130701085619-18e6ab6b7f4e // indirect
+	golang.org/x/net v0.0.0-20220805013720-a33c5aa5df48 // indirect
 )
 
 require (
 	github.com/AllenDang/gform v0.0.0-20130830051017-6bb9f0d6b77e
 	github.com/asticode/go-astikit v0.31.0 // indirect
 	github.com/gonutz/w32 v1.0.0
-	golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c // indirect
+	golang.org/x/text v0.3.7 // indirect
 	rsc.io/sampler v1.3.0 // indirect
 )
