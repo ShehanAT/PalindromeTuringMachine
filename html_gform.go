@@ -6,6 +6,12 @@ import (
 	"github.com/vmihailenco/gforms"
 )
 
+type Article struct {
+	id      int
+	title   string
+	message string
+}
+
 type ArticleForm struct {
 	gforms.BaseForm
 	Title    *gforms.StringField `gforms:",req"`
@@ -18,7 +24,7 @@ func NewArticleForm(article *Article) *ArticleForm {
 	gforms.InitForm(f)
 
 	f.Title.MaxLen = 500
-	f.IsPublic.Label = "Is public?"
+	f.IsPublic = true
 
 	if article != nil {
 		f.Title.SetInitial(article.Title)
