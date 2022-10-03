@@ -62,6 +62,7 @@ func main() {
 	heading_text.SetText("Modal Text")
 	close_modal_btn.SetText("Close")
 	modal_div.AddElement(heading_text)
+	modal_div.AddElement(close_modal_btn)
 	// modal_div.AddHTML(`
 	// 	<div class="modal" id="modal-one">
 	// 		<div class="modal-bg modal-exit"></div>
