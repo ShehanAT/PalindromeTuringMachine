@@ -27,11 +27,16 @@ func ShowIndexPage() {
 		"formatAsDate": formatAsDate,
 	})
 
-	r.LoadHTMLFiles(workingDirPath + "\\frontend\\html\\index.tmpl")
+	// r.LoadHTMLFiles(workingDirPath + "\\frontend\\templates\\index.tmpl")
+	r.LoadHTMLGlob(workingDirPath + "\\frontend\\templates\\**\\*.tmpl")
+	// r.LoadHTMLGlob(workingDirPath + "\\frontend\\templates\\*.tmpl")
+
+	r.Static("/assets", "./assets")
 
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.tmpl", gin.H{
-			"now": time.Date(2022, 010, 006, 0, 0, 0, 0, time.UTC),
+			"now":            time.Date(2022, 010, 006, 0, 0, 0, 0, time.UTC),
+			"workingDirPath": workingDirPath,
 		})
 
 	})
