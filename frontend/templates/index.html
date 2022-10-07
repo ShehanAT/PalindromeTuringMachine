@@ -1,9 +1,16 @@
-Date: {[{.now | formatAsDate}]}
+<!doctype html>
 
-<body>
-    {{include "globals/header"}}
-    <div>
+<html>
+    <head>
+        <title>{{.title}}</title>
+        {{include "globals/header"}}
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css" />
+        <link rel="stylesheet" href="index.css" />
+
+    </head>
+    <body>
         {{template "partials/dashboard"}}
-    </div>
-    {{include "globals/footer"}}
-</body>
+        {{include "globals/footer"}}
+    </body>    
+</html>
