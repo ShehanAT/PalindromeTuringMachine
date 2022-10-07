@@ -35,6 +35,7 @@ require (
 require (
 	github.com/AllenDang/gform v0.0.0-20130830051017-6bb9f0d6b77e
 	github.com/asticode/go-astikit v0.31.0 // indirect
+	github.com/foolin/gin-template v0.0.0-20190415034731-41efedfb393b
 	github.com/gonutz/w32 v1.0.0
 	golang.org/x/text v0.3.7 // indirect
 	rsc.io/sampler v1.3.0 // indirect
