@@ -40,8 +40,26 @@
                 <h5>Write Value: <b id="write-value">0</b>
             </div>
         </fieldset>
+        <fieldset>
+            <legend>Next</legend>
+            <div class="option-slider">
+                <div class="option-slider">
+                    <div id="next-slider"></div>
+                </div>
+                <h5>Next Value: <b id="next-value">0</b>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Move</legend>
+            <select name="move-dropdown" id="move-dropdown">
+                <option default value="null">Select Move</option>
+                <option value="Left">Left</option>
+                <option value="Right">Right</option>
+            </select>
+        </fieldset> 
         
-     
+        <button class="btn btn-primary" id="submit-btn">Submit</button>
 
            <!-- ✅ load jQuery ✅ -->
         <script
@@ -91,6 +109,54 @@
                         $("#write-value").text($("#write-slider").slider("value"));
                     }
                 });
+
+                $("#next-slider").slider({
+                    value: 0,
+                    min: 0,
+                    max: 10,
+                    step: 1,
+                    change: function(event, ui){
+                        $("#next-value").text($("#next-slider").slider("value"));
+                    }
+                });
+
+        
+
+                $("#submit-btn").on("click", function(){
+                    var stateValue = $("#state-slider").slider("value");
+                    var readValue = $("#read-slider").slider("value");
+                    var nextValue = $("#next-slider").slider("value");
+                    var writeValue = $("#write-slider").slider("value");
+                    var moveValue = $("#move-dropdown").val();
+                    console.log(stateValue);
+                    console.log(readValue);
+                    console.log(nextValue);
+                    console.log(writeValue);
+                    console.log(moveValue);
+
+                    $.ajax({
+                        url: "/create-rules",
+                        method: "POST",
+                        dataType: "JSON",
+                        data: { 
+                            createRule: {
+                                stateValue: stateValue,
+                                readValue: readValue,
+                                writeValue: writeValue,
+                                nextValue: nextValue,
+                                moveValue: moveValue
+                            }
+                        },
+                        success: function(result){
+                            console.log(result);
+                        },
+                        error: function(err){
+                            console.log(err);
+                        }
+                    });
+                });
+
+             
             });
            
         

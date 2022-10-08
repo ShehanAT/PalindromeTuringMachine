@@ -45,5 +45,9 @@ func ShowIndexPage() {
 		})
 	})
 
+	r.POST("/create-rules", func(ctx *gin.Context) {
+		fmt.Print(ctx)
+	})
+
 	r.Run() // listen and serve on 0.0.0.0:8080 (for Windows: "localhost:8080")
 }
