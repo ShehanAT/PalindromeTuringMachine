@@ -11,11 +11,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// func formatAsDate(t time.Time) string {
-// 	year, month, day := t.Date()
-// 	return fmt.Sprintf("%d/%02d/%02d", year, month, day)
-// }
-
 func ShowIndexPage() {
 	r := gin.Default()
 
@@ -38,35 +33,14 @@ func ShowIndexPage() {
 		DisableCache: true,
 	})
 
-	// r.Delims("{[{", "}]}")
-	// workingDirPath, err := os.Getwd()
-
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-
-	// r.LoadHTMLFiles(workingDirPath + "\\frontend\\templates\\index.tmpl")
-	// r.LoadHTMLGlob(workingDirPath + "\\frontend\\templates\\**\\*.tmpl")
-	// r.LoadHTMLGlob(workingDirPath + "\\frontend\\templates\\*.tmpl")
-
-	// r.Static("/assets", "./assets")
-
 	r.GET("/", func(ctx *gin.Context) {
-		// c.HTML(http.StatusOK, "index.tmpl", gin.H{
-		// 	"now":            time.Date(2022, 010, 006, 0, 0, 0, 0, time.UTC),
-		// 	"workingDirPath": workingDirPath,
-		// })
 		gintemplate.HTML(ctx, http.StatusOK, "index", gin.H{
 			"title": "Turing Machine on the Web!",
 		})
 	})
 
 	r.GET("/create-rules", func(ctx *gin.Context) {
-		// c.HTML(http.StatusOK, "index.tmpl", gin.H{
-		// 	"now":            time.Date(2022, 010, 006, 0, 0, 0, 0, time.UTC),
-		// 	"workingDirPath": workingDirPath,
-		// })
-		gintemplate.HTML(ctx, http.StatusOK, "partials/create-rules", gin.H{
+		gintemplate.HTML(ctx, http.StatusOK, "partials/create-rules.html", gin.H{
 			"title": "Create Rules Page",
 		})
 	})

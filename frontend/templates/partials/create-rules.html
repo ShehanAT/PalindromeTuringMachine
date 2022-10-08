@@ -1,0 +1,100 @@
+<!doctype html>
+
+<html>
+    <head>
+        <title>{{.title}}</title>
+        {{include "globals/header"}}
+        <link
+            href="https://code.jquery.com/ui/1.12.1/themes/ui-lightness/jquery-ui.css"
+            rel="stylesheet"
+        />
+     
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css" />
+        <link rel="stylesheet" href="index.css" />
+
+    </head>
+    <body>
+        <fieldset class="state-section">
+            <legend>State</legend>
+            <div class="option-slider">
+                <div id="state-slider"></div>
+            </div>
+            <h5>State Value: <b id="state-value">0</b>
+        </fieldset>
+        <fieldset>
+            <legend>Read</legend>
+            <div class="option-slider">
+                <div class="option-slider">
+                    <div id="read-slider"></div>
+                </div>
+                <h5>Read Value: <b id="read-value">0</b>
+            </div>
+        </fieldset>
+        <fieldset>
+            <legend>Write</legend>
+            <div class="option-slider">
+                <div class="option-slider">
+                    <div id="write-slider"></div>
+                </div>
+                <h5>Write Value: <b id="write-value">0</b>
+            </div>
+        </fieldset>
+        
+     
+
+           <!-- ✅ load jQuery ✅ -->
+        <script
+           src="https://code.jquery.com/jquery-3.6.0.min.js"
+           integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+           crossorigin="anonymous"
+        ></script>
+
+        <!-- ✅ load jQuery UI ✅ -->
+        <script
+           src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"
+           integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA=="
+           crossorigin="anonymous"
+           referrerpolicy="no-referrer"
+        ></script>
+
+        <script>
+            $(document).ready(function() {
+                console.log("jQuery loaded!");
+
+                $("#state-slider").slider({
+                    value: 0,
+                    min: 0,
+                    max: 10,
+                    step: 1,
+                    change: function(event, ui){
+                        $("#state-value").text($("#state-slider").slider("value"));
+                    }
+                });
+
+                $("#read-slider").slider({
+                    value: 0,
+                    min: 0,
+                    max: 10,
+                    step: 1,
+                    change: function(event, ui){
+                        $("#read-value").text($("#read-slider").slider("value"));
+                    }
+                });
+
+                $("#write-slider").slider({
+                    value: 0,
+                    min: 0,
+                    max: 10,
+                    step: 1,
+                    change: function(event, ui){
+                        $("#write-value").text($("#write-slider").slider("value"));
+                    }
+                });
+            });
+           
+        
+        </script>
+    </body>    
+</html>
+
