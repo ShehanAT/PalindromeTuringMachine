@@ -11,6 +11,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type CreateRuleInput struct {
+	StateValue string `form:"stateValue" binding: "required"`
+	ReadValue  string `form: "readValue" binding: "required"`
+	NextValue  string `form: "nextValue" binding: "required"`
+	WriteValue string `form: "writeValue" binding: "required"`
+	MoveValue  string `form: "moveValue" binding: "required"`
+}
+
 func ShowIndexPage() {
 	r := gin.Default()
 
@@ -46,7 +54,13 @@ func ShowIndexPage() {
 	})
 
 	r.POST("/create-rules", func(ctx *gin.Context) {
-		fmt.Print(ctx)
+		createRules := &CreateRuleInput{}
+		ctx.Bind(createRules)
+		fmt.Println(createRules.StateValue)
+		fmt.Println(createRules.MoveValue)
+		fmt.Println(createRules.NextValue)
+		fmt.Println(createRules.ReadValue)
+		fmt.Println(createRules.WriteValue)
 	})
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for Windows: "localhost:8080")

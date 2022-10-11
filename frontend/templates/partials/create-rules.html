@@ -15,52 +15,33 @@
 
     </head>
     <body>
-        <fieldset class="state-section">
-            <legend>State</legend>
-            <div class="option-slider">
-                <div id="state-slider"></div>
+        <form action="/create-rules" method="POST">
+            <div>
+                <label for="stateValue">State Value:</label>
+                <input type="text" name="stateValue" id="stateValue"/>
             </div>
-            <h5>State Value: <b id="state-value">0</b>
-        </fieldset>
-        <fieldset>
-            <legend>Read</legend>
-            <div class="option-slider">
-                <div class="option-slider">
-                    <div id="read-slider"></div>
-                </div>
-                <h5>Read Value: <b id="read-value">0</b>
+            <div>
+                <label for="readValue">Read Value:</label>
+                <input type="text" name="readValue" id="readValue"/>
             </div>
-        </fieldset>
-        <fieldset>
-            <legend>Write</legend>
-            <div class="option-slider">
-                <div class="option-slider">
-                    <div id="write-slider"></div>
-                </div>
-                <h5>Write Value: <b id="write-value">0</b>
+            <div>
+                <label for="writeValue">Write Value:</label>
+                <input type="text" name="writeValue" id="writeValue"/>
             </div>
-        </fieldset>
-        <fieldset>
-            <legend>Next</legend>
-            <div class="option-slider">
-                <div class="option-slider">
-                    <div id="next-slider"></div>
-                </div>
-                <h5>Next Value: <b id="next-value">0</b>
+            <div>
+                <label for="nextValue">Next Value:</label>
+                <input type="text" name="nextValue" id="nextValue"/>
             </div>
-        </fieldset>
-
-        <fieldset>
-            <legend>Move</legend>
-            <select name="move-dropdown" id="move-dropdown">
-                <option default value="null">Select Move</option>
-                <option value="Left">Left</option>
-                <option value="Right">Right</option>
-            </select>
-        </fieldset> 
-        
-        <button class="btn btn-primary" id="submit-btn">Submit</button>
-
+            <div>
+                <label for="move-dropdown">Select Move:</label>
+                <select name="moveValue" id="move-dropdown">
+                    <option default value="null">Select Move</option>
+                    <option value="Left">Left</option>
+                    <option value="Right">Right</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </form>
            <!-- ✅ load jQuery ✅ -->
         <script
            src="https://code.jquery.com/jquery-3.6.0.min.js"
@@ -139,13 +120,11 @@
                         method: "POST",
                         dataType: "JSON",
                         data: { 
-                            createRule: {
-                                stateValue: stateValue,
-                                readValue: readValue,
-                                writeValue: writeValue,
-                                nextValue: nextValue,
-                                moveValue: moveValue
-                            }
+                            stateValue: stateValue,
+                            readValue: readValue,
+                            writeValue: writeValue,
+                            nextValue: nextValue,
+                            moveValue: moveValue
                         },
                         success: function(result){
                             console.log(result);
