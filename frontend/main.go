@@ -13,10 +13,10 @@ import (
 
 type CreateRuleInput struct {
 	StateValue string `form:"stateValue" binding: "required"`
-	ReadValue  string `form: "readValue" binding: "required"`
-	NextValue  string `form: "nextValue" binding: "required"`
-	WriteValue string `form: "writeValue" binding: "required"`
-	MoveValue  string `form: "moveValue" binding: "required"`
+	ReadValue  string `form:"readValue" binding: "required"`
+	NextValue  string `form:"nextValue" binding: "required"`
+	WriteValue string `form:"writeValue" binding: "required"`
+	MoveValue  string `form:"moveValue" binding: "required"`
 }
 
 func ShowIndexPage() {
@@ -61,6 +61,9 @@ func ShowIndexPage() {
 		fmt.Println(createRules.NextValue)
 		fmt.Println(createRules.ReadValue)
 		fmt.Println(createRules.WriteValue)
+		gintemplate.HTML(ctx, http.StatusOK, "partials/dashboard.html", gin.H{
+			"createRules": createRules,
+		})
 	})
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for Windows: "localhost:8080")
