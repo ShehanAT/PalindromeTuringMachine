@@ -3,6 +3,7 @@ package frontend
 import (
 	"fmt"
 	"html/template"
+
 	"net/http"
 	"os"
 	"time"
@@ -67,4 +68,9 @@ func ShowIndexPage() {
 	})
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for Windows: "localhost:8080")
+}
+
+func main() {
+	// Initialize the DbMap
+
 }
