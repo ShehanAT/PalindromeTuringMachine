@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"time"
 
 	. "github.com/ShehanAT/TuringMachine/frontend"
 
@@ -19,7 +18,21 @@ func main() {
 	dbmap := initDb()
 	defer dbmap.Db.Close()
 	fmt.Println("passing main")
-
+	r1 := newRule(5)
+	// r2 := newRule(6)
+	// r3 := newRule(7)
+	fmt.Println(r1)
+	insertErr := dbmap.TruncateTables()
+	insertErr = dbmap.Insert(&r1)
+	checkErr(insertErr, "Insert Failed")
+	var rules []Rule
+	_, err := dbmap.Select(&rules, "select * from rule")
+	checkErr(err, "Select failed")
+	fmt.Println("All rows:")
+	fmt.Println(rules)
+	for x, p := range rules {
+		fmt.Println("	%d: %v\n", x, p)
+	}
 	ShowIndexPage()
 	// 	initAstilectron()
 
@@ -56,13 +69,11 @@ func main() {
 type Rule struct {
 	// Db tag lets you specify the column name if it differs from the struct field
 	Id         int64 `db:"rule_id"`
-	created    int64
-	stateValue int64
+	stateValue int64 `db:"state_value"`
 }
 
 func newRule(stateValue int64) Rule {
 	return Rule{
-		created:    time.Now().UnixNano(),
 		stateValue: stateValue,
 	}
 }
