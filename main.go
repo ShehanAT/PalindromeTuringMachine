@@ -34,8 +34,8 @@ func main() {
 	p1 := newPost("Go 1.1 released!", "Lorem ipsum lorem ipsum")
 	p2 := newPost("Go 1.2 released!", "Lorem ipsum lorem ipsum")
 
-	r1 := newRule("Title 1", "5")
-	r2 := newRule("Title 2", "6")
+	r1 := newRule("5", "3", "2", "6", "Left")
+	r2 := newRule("6", "1", "7", "2", "Right")
 	// insert rows - auto increment PKs will be set properly after the insert
 	err = dbmap.Insert(&p1, &p2)
 	checkErr(err, "Insert failed")
@@ -106,6 +106,17 @@ type Post struct {
 	Body    string `db:"article_body,size:1024"` // Set both column name and size
 }
 
+type Rule struct {
+	// Db tag lets you specify the column name if it differs from the struct field
+	Id int64 `db:"rule_id"`
+	// Title      string `db:",size:50"`
+	StateValue string `db:",size:20"`
+	ReadValue  string `db:",size:20"`
+	NextValue  string `db:",size:20"`
+	WriteValue string `db:",size:20"`
+	MoveValue  string `db:",size:20"`
+}
+
 func newPost(title, body string) Post {
 	return Post{
 		Created: time.Now().UnixNano(),
@@ -114,17 +125,13 @@ func newPost(title, body string) Post {
 	}
 }
 
-type Rule struct {
-	// Db tag lets you specify the column name if it differs from the struct field
-	Id         int64  `db:"rule_id"`
-	Title      string `db:",size:50"`
-	StateValue string `db:",size:50"`
-}
-
-func newRule(title, stateValue string) Rule {
+func newRule(stateValue, readValue, writeValue, moveValue, nextValue string) Rule {
 	return Rule{
-		Title:      title,
 		StateValue: stateValue,
+		ReadValue:  readValue,
+		NextValue:  nextValue,
+		WriteValue: writeValue,
+		MoveValue:  moveValue,
 	}
 }
 
