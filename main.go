@@ -3,78 +3,128 @@ package main
 import (
 	// stands for the Format package
 	"database/sql"
-	"fmt"
 	"log"
+	"time"
 
-	. "github.com/ShehanAT/TuringMachine/frontend"
+	// . "github.com/ShehanAT/TuringMachine/frontend"
 
 	// "turing_machine"
 	_ "github.com/mattn/go-sqlite3"
 	"gopkg.in/gorp.v1"
 )
 
-func main() {
+// func main() {
 
+// 	dbmap := initDb()
+// 	defer dbmap.Db.Close()
+
+// 	ShowIndexPage()
+
+// }
+
+func main() {
 	dbmap := initDb()
 	defer dbmap.Db.Close()
-	fmt.Println("passing main")
-	r1 := newRule(5)
-	// r2 := newRule(6)
-	// r3 := newRule(7)
-	fmt.Println(r1)
-	insertErr := dbmap.TruncateTables()
-	insertErr = dbmap.Insert(&r1)
-	checkErr(insertErr, "Insert Failed")
-	var rules []Rule
-	_, err := dbmap.Select(&rules, "select * from rule")
+
+	// delete any existing rows
+	err := dbmap.TruncateTables()
+	checkErr(err, "TruncateTables failed")
+
+	// create two posts
+	p1 := newPost("Go 1.1 released!", "Lorem ipsum lorem ipsum")
+	p2 := newPost("Go 1.2 released!", "Lorem ipsum lorem ipsum")
+
+	r1 := newRule("Title 1", "5")
+	r2 := newRule("Title 2", "6")
+	// insert rows - auto increment PKs will be set properly after the insert
+	err = dbmap.Insert(&p1, &p2)
+	checkErr(err, "Insert failed")
+
+	ruleErr := dbmap.Insert(&r1, &r2)
+	checkErr(ruleErr, "Rule Insert failed")
+
+	// use convenience SelectInt
+	count, err := dbmap.SelectInt("select count(*) from posts")
+	checkErr(err, "select count(*) failed")
+	log.Println("Rows after inserting:", count)
+
+	// update a row
+	p2.Title = "Go 1.2 is better than ever"
+	count, err = dbmap.Update(&p2)
+	checkErr(err, "Update failed")
+	log.Println("Rows updated:", count)
+
+	// fetch one row - note use of "post_id" instead of "Id" since column is aliased
+	//
+	// Postgres users should use $1 instead of ? placeholders
+	// See 'Known Issues' below
+	//
+	err = dbmap.SelectOne(&p2, "select * from posts where post_id=?", p2.Id)
+	checkErr(err, "SelectOne failed")
+	log.Println("p2 row:", p2)
+
+	// fetch all rows
+	var posts []Post
+	_, err = dbmap.Select(&posts, "select * from posts order by post_id")
 	checkErr(err, "Select failed")
-	fmt.Println("All rows:")
-	fmt.Println(rules)
-	for x, p := range rules {
-		fmt.Println("	%d: %v\n", x, p)
+	log.Println("All rows:")
+	for x, p := range posts {
+		log.Printf("    %d: %v\n", x, p)
 	}
-	ShowIndexPage()
-	// 	initAstilectron()
 
-	// 	// args := os.Args
+	// fetch all rules
+	var rules []Rule
+	_, err = dbmap.Select(&rules, "select * from rules order by rule_id")
+	checkErr(err, "Select failed")
+	log.Println("All rows:")
+	for x, p := range rules {
+		log.Printf("    %d: %v\n", x, p)
+	}
 
-	// 	// nTM := NewTM()
+	// delete row by PK
+	count, err = dbmap.Delete(&p1)
+	checkErr(err, "Delete failed")
+	log.Println("Rows deleted:", count)
 
-	// 	// //Input State and declare if it is final state
-	// 	// nTM.InputState("0", false)
-	// 	// nTM.InputState("1", true)
+	// delete row manually via Exec
+	_, err = dbmap.Exec("delete from posts where post_id=?", p2.Id)
+	checkErr(err, "Exec failed")
 
-	// 	// //Input config
-	// 	// // InputConfig parameter as follow:
-	// 	// //	- SourceState,
-	// 	// // - Input
-	// 	// // - Modified Value
-	// 	// // - DestinationState
-	// 	// // - Tape Head Move Direction
-	// 	// nTM.InputConfig("0", "1", "1", "1", MoveRight)
-	// 	// nTM.InputConfig("0", "0", "1", "0", MoveLeft)
-	// 	// nTM.InputConfig("1", "0", "1", "0", MoveLeft)
-	// 	// nTM.InputConfig("1", "1", "1", "1", MoveRight)
+	// confirm count is zero
+	count, err = dbmap.SelectInt("select count(*) from posts")
+	checkErr(err, "select count(*) failed")
+	log.Println("Row count - should be zero:", count)
 
-	// 	// //Input tape data
-	// 	// nTM.InputTape(args[1:]...)
+	log.Println("Done!")
+}
 
-	// 	// //Run TM to the finish (if exist)
-	// 	// nTM.Run()
+type Post struct {
+	// db tag lets you specify the column name if it differs from the struct field
+	Id      int64 `db:"post_id"`
+	Created int64
+	Title   string `db:",size:50"`               // Column size set to 50
+	Body    string `db:"article_body,size:1024"` // Set both column name and size
+}
 
-	// 	// fmt.Println("New Tape:=", nTM.ExportTape())
-
+func newPost(title, body string) Post {
+	return Post{
+		Created: time.Now().UnixNano(),
+		Title:   title,
+		Body:    body,
+	}
 }
 
 type Rule struct {
 	// Db tag lets you specify the column name if it differs from the struct field
-	Id         int64 `db:"rule_id"`
-	stateValue int64 `db:"state_value"`
+	Id         int64  `db:"rule_id"`
+	Title      string `db:",size:50"`
+	StateValue string `db:",size:50"`
 }
 
-func newRule(stateValue int64) Rule {
+func newRule(title, stateValue string) Rule {
 	return Rule{
-		stateValue: stateValue,
+		Title:      title,
+		StateValue: stateValue,
 	}
 }
 
@@ -89,7 +139,8 @@ func initDb() *gorp.DbMap {
 
 	// Add a table, setting the table name to 'posts' and
 	// specifying that the Id property is an auto incrementing PK
-	dbmap.AddTableWithName(Rule{}, "rule").SetKeys(true, "Id")
+	dbmap.AddTableWithName(Rule{}, "rules").SetKeys(true, "Id")
+	dbmap.AddTableWithName(Post{}, "posts").SetKeys(true, "Id")
 
 	// Create the table. In a production system you'd generally
 	// Use a migration tool, or create the tables via scripts
