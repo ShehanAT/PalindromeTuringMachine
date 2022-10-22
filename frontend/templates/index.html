@@ -16,5 +16,18 @@
     <body>
         {{template "partials/dashboard"}}
         {{include "globals/footer"}}
+
+        <table>
+        <tr>State Value<tr>
+        {{range .rules}}
+        <tr>
+          {{.StateValue}}
+          {{.MoveValue}}
+          {{.ReadValue}}
+          {{.WriteValue}}
+          {{.NextValue}}
+        </tr>
+        {{end}}
+        </table>
     </body>    
 </html>

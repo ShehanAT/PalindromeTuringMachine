@@ -3,6 +3,7 @@ package frontend
 import (
 	"fmt"
 	"html/template"
+	"reflect"
 
 	"net/http"
 	"os"
@@ -14,9 +15,6 @@ import (
 	gintemplate "github.com/foolin/gin-template"
 	"github.com/gin-gonic/gin"
 
-	// . "github.com/ShehanAT/TuringMachine/frontend"
-
-	// "turing_machine"
 	_ "github.com/mattn/go-sqlite3"
 	"gopkg.in/gorp.v1"
 )
@@ -71,11 +69,26 @@ func RenderFrontend() {
 		_, err = dbmap.Select(&rules, "select * from rules order by rule_id")
 		checkErr(err, "Select failed")
 		log.Println("All rows:")
+		var currentRules []CreateRuleInput
 		for x, p := range rules {
-			log.Printf("    %d: %v\n", x, p)
+			fmt.Println(p.StateValue)
+			fmt.Println(p.MoveValue)
+			fmt.Println(reflect.TypeOf(p))
+			fmt.Println(x)
+			rule := CreateRuleInput{
+				StateValue: p.StateValue,
+				MoveValue:  p.MoveValue,
+				ReadValue:  p.ReadValue,
+				WriteValue: p.WriteValue,
+				NextValue:  p.NextValue,
+			}
+			currentRules = append(currentRules, rule)
+
+			// fmt.Print("%v: %v\n", x, p)
 		}
 		gintemplate.HTML(ctx, http.StatusOK, "index", gin.H{
 			"title": "Turing Machine on the Web!",
+			"rules": currentRules,
 		})
 	})
 
@@ -98,9 +111,7 @@ func RenderFrontend() {
 		ruleErr := dbmap.Insert(&r1)
 		checkErr(ruleErr, "Rule Insert failed")
 
-		gintemplate.HTML(ctx, http.StatusOK, "partials/dashboard.html", gin.H{
-			"createRules": createRules,
-		})
+		ctx.Redirect(http.StatusFound, "/")
 	})
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for Windows: "localhost:8080")
