@@ -29,7 +29,7 @@ type CreateRuleInput struct {
 	MoveValue  string `form:"moveValue" binding: "required"`
 }
 
-func renderFrontend() {
+func RenderFrontend() {
 	r := gin.Default()
 
 	workingDir, workingDirErr := os.Getwd()
@@ -45,27 +45,13 @@ func renderFrontend() {
 	err := dbmap.TruncateTables()
 	checkErr(err, "TruncateTables failed")
 
-	r1 := newRule("5", "3", "2", "6", "Left")
-	r2 := newRule("6", "1", "7", "2", "Right")
-
-	ruleErr := dbmap.Insert(&r1, &r2)
-	checkErr(ruleErr, "Rule Insert failed")
-
 	// use convenience SelectInt
-	count, err := dbmap.SelectInt("select count(*) from posts")
-	checkErr(err, "select count(*) failed")
-	log.Println("Rows after inserting:", count)
+	// count, err := dbmap.SelectInt("select count(*) from posts")
+	// checkErr(err, "select count(*) failed")
+	// log.Println("Rows after inserting:", count)
 
-	checkErr(err, "Update failed")
-	log.Println("Rows updated:", count)
-
-	var rules []Rule
-	_, err = dbmap.Select(&rules, "select * from rules order by rule_id")
-	checkErr(err, "Select failed")
-	log.Println("All rows:")
-	for x, p := range rules {
-		log.Printf("    %d: %v\n", x, p)
-	}
+	// checkErr(err, "Update failed")
+	// log.Println("Rows updated:", count)
 
 	r.HTMLRender = gintemplate.New(gintemplate.TemplateConfig{
 		Root:      workingDir + "/frontend/templates",
@@ -81,6 +67,13 @@ func renderFrontend() {
 	})
 
 	r.GET("/", func(ctx *gin.Context) {
+		var rules []Rule
+		_, err = dbmap.Select(&rules, "select * from rules order by rule_id")
+		checkErr(err, "Select failed")
+		log.Println("All rows:")
+		for x, p := range rules {
+			log.Printf("    %d: %v\n", x, p)
+		}
 		gintemplate.HTML(ctx, http.StatusOK, "index", gin.H{
 			"title": "Turing Machine on the Web!",
 		})
@@ -100,6 +93,11 @@ func renderFrontend() {
 		fmt.Println(createRules.NextValue)
 		fmt.Println(createRules.ReadValue)
 		fmt.Println(createRules.WriteValue)
+		r1 := newRule(createRules.StateValue, createRules.ReadValue, createRules.WriteValue, createRules.MoveValue, createRules.NextValue)
+
+		ruleErr := dbmap.Insert(&r1)
+		checkErr(ruleErr, "Rule Insert failed")
+
 		gintemplate.HTML(ctx, http.StatusOK, "partials/dashboard.html", gin.H{
 			"createRules": createRules,
 		})
@@ -154,4 +152,8 @@ func checkErr(err error, msg string) {
 	if err != nil {
 		log.Fatalln(msg, err)
 	}
+}
+
+func main() {
+
 }
