@@ -8,8 +8,17 @@ import (
 	"os"
 	"time"
 
+	"database/sql"
+	"log"
+
 	gintemplate "github.com/foolin/gin-template"
 	"github.com/gin-gonic/gin"
+
+	// . "github.com/ShehanAT/TuringMachine/frontend"
+
+	// "turing_machine"
+	_ "github.com/mattn/go-sqlite3"
+	"gopkg.in/gorp.v1"
 )
 
 type CreateRuleInput struct {
@@ -20,13 +29,42 @@ type CreateRuleInput struct {
 	MoveValue  string `form:"moveValue" binding: "required"`
 }
 
-func ShowIndexPage() {
+func renderFrontend() {
 	r := gin.Default()
 
-	workingDir, err := os.Getwd()
+	workingDir, workingDirErr := os.Getwd()
 
-	if err != nil {
-		fmt.Print(err)
+	if workingDirErr != nil {
+		fmt.Print(workingDirErr)
+	}
+
+	dbmap := initDb()
+	defer dbmap.Db.Close()
+
+	// delete any existing rows
+	err := dbmap.TruncateTables()
+	checkErr(err, "TruncateTables failed")
+
+	r1 := newRule("5", "3", "2", "6", "Left")
+	r2 := newRule("6", "1", "7", "2", "Right")
+
+	ruleErr := dbmap.Insert(&r1, &r2)
+	checkErr(ruleErr, "Rule Insert failed")
+
+	// use convenience SelectInt
+	count, err := dbmap.SelectInt("select count(*) from posts")
+	checkErr(err, "select count(*) failed")
+	log.Println("Rows after inserting:", count)
+
+	checkErr(err, "Update failed")
+	log.Println("Rows updated:", count)
+
+	var rules []Rule
+	_, err = dbmap.Select(&rules, "select * from rules order by rule_id")
+	checkErr(err, "Select failed")
+	log.Println("All rows:")
+	for x, p := range rules {
+		log.Printf("    %d: %v\n", x, p)
 	}
 
 	r.HTMLRender = gintemplate.New(gintemplate.TemplateConfig{
@@ -70,7 +108,50 @@ func ShowIndexPage() {
 	r.Run() // listen and serve on 0.0.0.0:8080 (for Windows: "localhost:8080")
 }
 
-func main() {
-	// Initialize the DbMap
+type Rule struct {
+	// Db tag lets you specify the column name if it differs from the struct field
+	Id int64 `db:"rule_id"`
+	// Title      string `db:",size:50"`
+	StateValue string `db:"state_value"`
+	ReadValue  string `db:"read_value"`
+	NextValue  string `db:"next_value"`
+	WriteValue string `db:"write_value"`
+	MoveValue  string `db:"move_value"`
+}
 
+func newRule(stateValue, readValue, writeValue, moveValue, nextValue string) Rule {
+	return Rule{
+		StateValue: stateValue,
+		ReadValue:  readValue,
+		NextValue:  nextValue,
+		WriteValue: writeValue,
+		MoveValue:  moveValue,
+	}
+}
+
+func initDb() *gorp.DbMap {
+	// Connect to db using standard Go database/sql API
+	// Use whatever database/sql driver you wish
+	db, err := sql.Open("sqlite3", "tmp/rules_db.bin")
+	checkErr(err, "sql.Open failed")
+
+	// Construct a gorp DbMap
+	dbmap := &gorp.DbMap{Db: db, Dialect: gorp.SqliteDialect{}}
+
+	// Add a table, setting the table name to 'posts' and
+	// specifying that the Id property is an auto incrementing PK
+	dbmap.AddTableWithName(Rule{}, "rules").SetKeys(true, "Id")
+
+	// Create the table. In a production system you'd generally
+	// Use a migration tool, or create the tables via scripts
+	err = dbmap.CreateTablesIfNotExists()
+	checkErr(err, "Create tables failed")
+
+	return dbmap
+}
+
+func checkErr(err error, msg string) {
+	if err != nil {
+		log.Fatalln(msg, err)
+	}
 }
