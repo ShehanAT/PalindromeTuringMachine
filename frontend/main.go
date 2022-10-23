@@ -3,7 +3,6 @@ package frontend
 import (
 	"fmt"
 	"html/template"
-	"reflect"
 
 	"net/http"
 	"os"
@@ -39,18 +38,6 @@ func RenderFrontend() {
 	dbmap := initDb()
 	defer dbmap.Db.Close()
 
-	// delete any existing rows
-	// err := dbmap.TruncateTables()
-	// checkErr(err, "TruncateTables failed")
-
-	// use convenience SelectInt
-	// count, err := dbmap.SelectInt("select count(*) from posts")
-	// checkErr(err, "select count(*) failed")
-	// log.Println("Rows after inserting:", count)
-
-	// checkErr(err, "Update failed")
-	// log.Println("Rows updated:", count)
-
 	r.HTMLRender = gintemplate.New(gintemplate.TemplateConfig{
 		Root:      workingDir + "/frontend/templates",
 		Extension: ".html",
@@ -70,11 +57,7 @@ func RenderFrontend() {
 		checkErr(err, "Select failed")
 		log.Println("All rows:")
 		var currentRules []CreateRuleInput
-		for x, p := range rules {
-			fmt.Println(p.StateValue)
-			fmt.Println(p.MoveValue)
-			fmt.Println(reflect.TypeOf(p))
-			fmt.Println(x)
+		for _, p := range rules {
 			rule := CreateRuleInput{
 				StateValue: p.StateValue,
 				MoveValue:  p.MoveValue,
@@ -83,11 +66,9 @@ func RenderFrontend() {
 				NextValue:  p.NextValue,
 			}
 			currentRules = append(currentRules, rule)
-
-			// fmt.Print("%v: %v\n", x, p)
 		}
 		gintemplate.HTML(ctx, http.StatusOK, "index", gin.H{
-			"title": "Turing Machine on the Web!",
+			"title": "Coding Informer",
 			"rules": currentRules,
 		})
 	})
@@ -101,11 +82,6 @@ func RenderFrontend() {
 	r.POST("/create-rules", func(ctx *gin.Context) {
 		createRules := &CreateRuleInput{}
 		ctx.Bind(createRules)
-		fmt.Println(createRules.StateValue)
-		fmt.Println(createRules.MoveValue)
-		fmt.Println(createRules.NextValue)
-		fmt.Println(createRules.ReadValue)
-		fmt.Println(createRules.WriteValue)
 		r1 := newRule(createRules.StateValue, createRules.ReadValue, createRules.WriteValue, createRules.MoveValue, createRules.NextValue)
 
 		ruleErr := dbmap.Insert(&r1)
@@ -120,7 +96,7 @@ func RenderFrontend() {
 type Rule struct {
 	// Db tag lets you specify the column name if it differs from the struct field
 	Id int64 `db:"rule_id"`
-	// Title      string `db:",size:50"`
+
 	StateValue string `db:"state_value"`
 	ReadValue  string `db:"read_value"`
 	NextValue  string `db:"next_value"`
