@@ -18,16 +18,41 @@
         {{include "globals/footer"}}
 
         <table>
-        <tr>State Value<tr>
-        {{range .rules}}
-        <tr>
-          {{.StateValue}}
-          {{.MoveValue}}
-          {{.ReadValue}}
-          {{.WriteValue}}
-          {{.NextValue}}
-        </tr>
-        {{end}}
+       
         </table>
+
+        <table>
+            <caption>
+          Current Rules
+        </caption>
+                  <colgroup>
+              <col>
+              <col>
+              <col style="background-color: #97DB9A;">
+              <col style="width= 42px">
+              <col style="background-color: #97DB9A;">
+              <col style="background-color: #DCC48E; border-style: solid; border-width: 3px ; border-color: #C1437A;">
+              <col style="width= 42px">
+              <col style="width= 42px">
+          </colgroup>
+            <tr>
+              <td>&nbsp;</td>
+              <th>State Value</th>
+              <th>Next Value</th>
+              <th>Read Value</th>
+              <th>Write Value</th>
+              <th>Move Value</th>
+            </tr>
+            {{range .rules}}
+                <tr>
+                    <th></th>
+                    <td>{{.StateValue}}</td>
+                    <td>{{.NextValue}}</td>
+                    <td>{{.ReadValue}}</td>
+                    <td>{{.WriteValue}}</td>
+                    <td>{{.MoveValue}}</td>              
+                </tr>
+            {{end}}
+          </table>
     </body>    
 </html>

@@ -40,8 +40,8 @@ func RenderFrontend() {
 	defer dbmap.Db.Close()
 
 	// delete any existing rows
-	err := dbmap.TruncateTables()
-	checkErr(err, "TruncateTables failed")
+	// err := dbmap.TruncateTables()
+	// checkErr(err, "TruncateTables failed")
 
 	// use convenience SelectInt
 	// count, err := dbmap.SelectInt("select count(*) from posts")
@@ -66,7 +66,7 @@ func RenderFrontend() {
 
 	r.GET("/", func(ctx *gin.Context) {
 		var rules []Rule
-		_, err = dbmap.Select(&rules, "select * from rules order by rule_id")
+		_, err := dbmap.Select(&rules, "select * from rules order by rule_id")
 		checkErr(err, "Select failed")
 		log.Println("All rows:")
 		var currentRules []CreateRuleInput
