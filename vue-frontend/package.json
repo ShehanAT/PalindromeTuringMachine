@@ -10,6 +10,7 @@
   "dependencies": {
     "animejs": "^3.2.1",
     "core-js": "^3.6.5",
+    "jquery": "^3.6.1",
     "vue": "^2.6.11"
   },
   "devDependencies": {

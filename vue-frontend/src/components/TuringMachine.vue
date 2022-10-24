@@ -1,6 +1,6 @@
 
 <template>
-  <div class="hello">
+  <div class="main-section">
     
         <div id="MachineTapeContainer">
           <div class="BoxTitle">Tape</div>
@@ -11,19 +11,134 @@
         </div>
 
         <button @click="moveTapeRight">Start</button>
+    <div class="controls-section">
+      <div id="MachineControlBlock">
+            <div class="BoxTitle">Controls</div>
+            <div id="MachineButtonsBlock">
+            <button id="RunButton" onclick="RunButton();" title="Start the machine running">Run</button> <!-- &#x25b8; !--> <!-- Unicode 'play' symbol !-->
+            <span title="If enabled, runs as fast as your browser &amp; computer allow">
+              <input type="checkbox" id="SpeedCheckbox" onclick="SpeedCheckbox();">Run at full speed
+            </span>
+            <br>
+            <button id="StopButton" onclick="StopButton();" disabled="disabled" title="Pause the machine when running">Pause</button><br> <!-- &#x25fe; !-->
+            <button id="UndoButton" onclick="Undo();" title="Undo one machine step" style="float: right;">Undo</button>
+            <button id="StepButton" onclick="StepButton();" title="Run the machine for a single step and the pause">Step</button><br> <!-- &#x25b8;&#x2759; !-->
+            <button id="ResetButton" onclick="ResetButton();" title="Reset the machine and tape to the initial state">Reset</button> <!-- &#x2759;&#x23ea; !-->
+            <div id="InitialTapeDisplay"  title="This initial data will be loaded on the tape when the machine starts">
+              Initial input:<input type="text" id="InitialInput" value="" onchange="ShowResetMsg(true);">
+            </div>
+            <div style="font-size: small;">
+              <a href="javascript:" onclick="$('#AdvancedOptions').slideToggle();" title="Show advanced machine options">Advanced options</a>
+            </div>
+            <div id="AdvancedOptions" style="display: none; margin-top: 0.25em;">
+              <div id="InitialStateDisplay"  title="This is the state that the machine will start in" style="margin-bottom: 0.5em;">
+              Initial state:<input type="text" id="InitialState" value="0" onchange="ShowResetMsg(true);">
+              </div>
+              <div title="Choose between different Turing machine variants">
+              Machine variant:
+              <select onchange="VariantChanged(true);" id="MachineVariant">
+                <option value="0" selected="selected">Standard</option>
+                <option value="1">Semi-infinite tape</option>
+                <option value="2">Non-deterministic</option>
+              </select>
+              <div id="MachineVariantDescription" style="font-size: small; font-style: italic;"></div>
+              <span style="font-size: x-small;"><a href="javascript:" onclick="$('#AdvancedOptions').hide();">[Close]</a></span>
+              </div>
+            </div> 
+            <div id="ResetMessage">Changes will take effect when the machine is reset.</div>
+            <br>
+            <br>
+            <div id="LoadBlock">
+              <a href="javascript:" onclick="$('#LoadMenu').slideToggle();" title="Load a pre-prepared example program">Load an example program</a>
+              <div id="LoadMenu">
+              <ul>
+                <li><a href="javascript:" onclick="LoadSampleProgram('palindrome', 'Palindrome detector');">Palindrome detector</a></li>
+                <li><a href="javascript:" onclick="LoadSampleProgram('binaryadd', 'Binary addition machine');">Binary addition</a></li>
+                <li><a href="javascript:" onclick="LoadSampleProgram('binarymult', 'Binary multiplication machine');">Binary multiplication</a></li>
+                <li><a href="javascript:" onclick="LoadSampleProgram('bin2dec', 'Binary to decimal conversion machine');">Binary to decimal conversion</a></li>
+                <li><a href="javascript:" onclick="LoadSampleProgram('turingsequence', 'Turing\'s sequence machine');">Turing's sequence machine</a></li>
+                <li><a href="javascript:" onclick="LoadSampleProgram('parentheses', 'Parentheses checker machine');">Parentheses checker</a></li>
+                <li><a href="javascript:" onclick="LoadSampleProgram('reversepolishboolean', 'Reverse Polish Boolean calculator');">Reverse Polish Boolean calculator</a></li>
+                <li><a href="javascript:" onclick="LoadSampleProgram('primetest', 'Primality test machine');">Primality test</a></li>
+                <li><a href="javascript:" onclick="LoadSampleProgram('4statebeaver', '4-state busy beaver');">4-state busy beaver</a></li>
+                <li><a href="javascript:" onclick="LoadSampleProgram('universal', 'Universal Turing machine');">Universal Turing machine</a></li>
+                <!--<li><a href="javascript:" onclick="LoadSampleProgram('error', 'Error machine');">Error</a></li>!--> <!-- for testing !-->
+              </ul>
+              <span style="font-size: x-small;"><a href="javascript:" onclick="$('#LoadMenu').hide();">[Close]</a></span>
+              </div>
+            </div> <!-- div inputProg !-->
+            <br>
+            <a href="javascript:" onclick="SaveToCloud();" title="Save your machine to the cloud for sharing or bookmarking">Save to the cloud</a>
+            <!--...<a href="javascript:" onclick="testsave(true);">test ok</a>...<a href="javascript:" onclick="testsave(false);">test error</a>!--> <!-- for testing !-->
+            <div id="SaveStatus">
+              <div id="SaveStatusFg">
+              <div id="SaveStatusMsg"></div>
+              <span style="font-size: x-small;"><a href="javascript:" onclick="ClearSaveMessage();">[Close]</a></span>
+              </div> 
+              <div id="SaveStatusBg"></div>
+            </div>
+            <!--<br><button id="DebugButton" onclick="x();">Debug</button><br>!-->
+        </div> <!-- div MachineButtonsBlock !-->
+     </div> <!-- div MachineControlBlock !-->
+
+
+    </div>
   </div>
+
+  
 </template>
 
 <script>
 import { translateRight } from "./animate"
+// import JQuery from 'jquery'
+import $ from 'jquery' 
+import { RunButton } from "./js-turing"
+// window.$ = JQuery 
+
 export default {
   name: 'TuringMachine',
   props: {
-    msg: String
+    msg: String,
+  },
+  data() {
+    return {
+        nDebugLevel : Boolean = 0,
+      bFullSpeed : Boolean = false,	/* If true, run at full speed with no delay between steps */
+      bIsReset : Boolean = false,		/* true if the machine has been reset, false if it is or has been running */
+      sTape : Number = "",				/* Contents of TM's tape. Stores all cells that have been visited by the head */
+      nTapeOffset : Number = 0,		/* the logical position on TM tape of the first character of sTape */
+      nHeadPosition : Number = 0,		/* the position of the TM's head on its tape. Initially zero; may be negative if TM moves to left */
+      sState : String = "0",
+      nSteps : Number = 0,
+      nVariant : Number = 0, /* Machine variant. 0 = standard infinite tape, 1 = tape infinite in one direction only, 2 = non-deterministic TM */
+      hRunTimer : Number = null,
+      aProgram : Object = new Object(),
+    /* aProgram is a double asociative array, indexed first by state then by symbol.
+      Its members are arrays of objects with properties newSymbol, action, newState, breakpoint and sourceLineNumber.
+    */
+
+      nMaxUndo : Number = 10,  /* Maximum number of undo steps */
+      aUndoList : Array,
+    /* aUndoList is an array of 'deltas' in the form {previous-state, direction, previous-symbol}. */
+
+    /* Variables for the source line numbering, markers */
+      nTextareaLines : String,
+      oTextarea : String,
+      bIsDirty : true	/* If true, source must be recompiled before running machine */,
+      oNextLineMarker : $("<div class='NextLineMarker'>Next<div class='NextLineMarkerEnd'></div></div>"),
+      oPrevLineMarker : $("<div class='PrevLineMarker'>Prev<div class='PrevLineMarkerEnd'></div></div>"),
+      oPrevInstruction : String,
+      sPreviousStatusMsg : String
+    }
+   
   },
   methods: {
     moveTapeRight() {
         translateRight(this.$refs.MachineHead, 10)
+
+    },
+    RunButton(){
+      RunButton()
     }
   }
 }
