@@ -94,6 +94,10 @@ func RenderFrontend() {
 		gintemplate.HTML(ctx, http.StatusOK, "partials/add-one-to-binary-num.html", gin.H{})
 	})
 
+	r.GET("/css-turing-machine", func(ctx *gin.Context) {
+		gintemplate.HTML(ctx, http.StatusOK, "partials/css-turing-machine.html", gin.H{})
+	})
+
 	r.Run() // listen and serve on 0.0.0.0:8080 (for Windows: "localhost:8080")
 }
 
