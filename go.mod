@@ -11,6 +11,7 @@ require (
 	github.com/AllenDang/w32 v0.0.0-20180428130237-ad0a36d80adc // indirect
 	github.com/dtylman/gowd v0.0.0-20220807062529-4271bc0536b7 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
+	github.com/gin-contrib/static v0.0.1 // indirect
 	github.com/gin-gonic/gin v1.8.1 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
@@ -35,6 +36,7 @@ require (
 require (
 	github.com/AllenDang/gform v0.0.0-20130830051017-6bb9f0d6b77e
 	github.com/asticode/go-astikit v0.31.0 // indirect
+	github.com/elazarl/go-bindata-assetfs v1.0.1
 	github.com/foolin/gin-template v0.0.0-20190415034731-41efedfb393b
 	github.com/gonutz/w32 v1.0.0
 	github.com/mattn/go-sqlite3 v1.14.15

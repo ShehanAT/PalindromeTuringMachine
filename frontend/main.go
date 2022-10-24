@@ -13,7 +13,6 @@ import (
 
 	gintemplate "github.com/foolin/gin-template"
 	"github.com/gin-gonic/gin"
-
 	_ "github.com/mattn/go-sqlite3"
 	"gopkg.in/gorp.v1"
 )
@@ -38,6 +37,9 @@ func RenderFrontend() {
 	dbmap := initDb()
 	defer dbmap.Db.Close()
 
+	r.Static("/assets", "./assets")
+	r.StaticFS("/templates/anime.min.js", http.Dir("templates"))
+	r.StaticFile("/templates/anime.min.js", "./templates/anime.min.js")
 	r.HTMLRender = gintemplate.New(gintemplate.TemplateConfig{
 		Root:      workingDir + "/frontend/templates",
 		Extension: ".html",
