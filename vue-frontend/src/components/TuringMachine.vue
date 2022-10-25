@@ -91,36 +91,37 @@
 <script>
 import { translateRight } from "./animate"
 // import JQuery from 'jquery'
-// import $ from 'jquery' 
+import $ from 'jquery' 
 // import { RunButton } from "./js-turing"
 // window.$ = JQuery 
 
 let nDebugLevel = 0;
 let bFullSpeed = false;	/* If true, run at full speed with no delay between steps */
 let bIsReset = false;		/* true if the machine has been reset, false if it is or has been running */
-// let sTape = "";				/* Contents of TM's tape. Stores all cells that have been visited by the head */
-// let nTapeOffset = 0;		/* the logical position on TM tape of the first character of sTape */
-// let nHeadPosition = 0;		/* the position of the TM's head on its tape. Initially zero; may be negative if TM moves to left */
-// let sState = "0";
-// let nSteps = 0;
-// let nVariant = 0; /* Machine variant. 0 = standard infinite tape, 1 = tape infinite in one direction only, 2 = non-deterministic TM */
-// let hRunTimer = null;
-// let aProgram = new Object();
+let sTape = "";				/* Contents of TM's tape. Stores all cells that have been visited by the head */
+let nTapeOffset = 0;		/* the logical position on TM tape of the first character of sTape */
+let nHeadPosition = 0;		/* the position of the TM's head on its tape. Initially zero; may be negative if TM moves to left */
+let sState = "0";
+let nSteps = 0;
+let nVariant = 0; /* Machine variant. 0 = standard infinite tape, 1 = tape infinite in one direction only, 2 = non-deterministic TM */
+let hRunTimer = null;
+let aProgram = new Object();
+let aResult = null;
 //     /* aProgram is a double asociative array, indexed first by state then by symbol.
 //       Its members are arrays of objects with properties newSymbol, action, newState, breakpoint and sourceLineNumber.
 //     */
 
-// let nMaxUndo = 10;  /* Maximum number of undo steps */
-// let aUndoList = [];
+let nMaxUndo = 10;  /* Maximum number of undo steps */
+let aUndoList = [];
 //     /* aUndoList is an array of 'deltas' in the form {previous-state, direction, previous-symbol}. */
 
 //     /* Variables for the source line numbering, markers */
-// let nTextareaLines = "";
-// let oTextarea = "";
+let nTextareaLines = "";
+let oTextarea = "";
 let bIsDirty = true;	/* If true, source must be recompiled before running machine */
+let oRegExp = new RegExp();
 // let oNextLineMarker = $("<div class='NextLineMarker'>Next<div class='NextLineMarkerEnd'></div></div>");
 // let oPrevLineMarker = $("<div class='PrevLineMarker'>Prev<div class='PrevLineMarkerEnd'></div></div>");
-// let oPrevInstruction = "";
 // let sPreviousStatusMsg = "";
 
 export default {
@@ -135,18 +136,151 @@ export default {
    
   },
   methods: {
+    StopTimer()
+    {
+      if( hRunTimer != null ) {
+        window.clearInterval( hRunTimer );
+        hRunTimer = null;
+      }
+    },
+    GetTapeSymbol( n )
+    {
+      if( n < nTapeOffset || n >= sTape.length + nTapeOffset ) {
+        this.debug( 4, "GetTapeSymbol( " + n + " ) = '" + c + "'   outside sTape range" );
+        return( "_" );
+      } else {
+        var c = sTape.charAt( n - nTapeOffset );
+        if( c == " " ) { c = "_"; this.debug( 4, "Warning: GetTapeSymbol() got SPACE not _ !" ); }
+        this.debug( 4, "GetTapeSymbol( " + n + " ) = '" + c + "'" );
+        return( c );
+      }
+    },
+    UpdateInterface()
+    {
+      // this.RenderTape();
+      // this.RenderState();
+      // this.RenderSteps();
+      // this.RenderLineMarkers();
+    },
+    LoadSampleProgram( zName, zFriendlyName, bInitial ){
+      this.debug( 1, "Load '" + zName + "'" );
+      this.SetStatusMessage( "Loading sample program..." );
+      var zFileName = "machines/" + zName + ".txt";
+      
+      this.StopTimer();   /* Stop machine, if currently running */
+      
+      $.ajax({
+        url: zFileName,
+        type: "GET",
+        dataType: "text",
+        success: function( sData ) {
+          /* Load the default initial tape, if any */
+          var oRegExp = new RegExp( ";.*\\$INITIAL_TAPE:? *(.+)$" );
+          var aRegexpResult = oRegExp.exec( sData );
+          if( aRegexpResult != null && aRegexpResult.length >= 2 ) {
+            this.debug( 4, "Parsed initial tape: '" + aRegexpResult + "' length: " + (aRegexpResult == null ? "null" : aRegexpResult.length) );
+            $("#InitialInput")[0].value = aRegexpResult[1];
+            sData = sData.replace( /^.*\$INITIAL_TAPE:.*$/m, "" );
+          }
+          $("#InitialState")[0].value = "0";
+          nVariant = 0;
+          $("#MachineVariant").val(0);
+          this.VariantChanged(false);
+          /* TODO: Set up CSS */
+
+          /* Load the program */
+          oTextarea.value = sData;
+          this.TextareaChanged();
+          this.Compile();
+          
+          /* Reset the machine  */
+          this.Reset();
+          if( !bInitial ) this.SetStatusMessage( zFriendlyName + " successfully loaded", 1 );
+        },
+        error: function( oData, sStatus, oRequestObj ) {
+          this.debug( 1, "Error: Load failed. HTTP response " + oRequestObj.status + " " + oRequestObj.statusText );
+          this.SetStatusMessage( "Error loading " + zFriendlyName + " :(", 2 );
+        }
+      });
+      
+      $("#LoadMenu").slideUp();
+      this.ClearSaveMessage();
+    },
+    ClearSaveMessage()
+    {
+      $("#SaveStatusMsg").empty();
+      $("#SaveStatus").hide();
+    },
+    TextareaChanged()
+    {
+      /* Update line numbers only if number of lines has changed */
+      var nNewLines = (oTextarea.value.match(/\n/g) ? oTextarea.value.match(/\n/g).length : 0) + 1;
+      if( nNewLines != nTextareaLines ) {
+        nTextareaLines = nNewLines
+        this.UpdateTextareaDecorations();
+      }
+      
+    //	Compile();
+      bIsDirty = true;
+      this.RenderLineMarkers();
+    },
+    VariantChanged(needWarning)
+      {
+        var dropdown = $("#MachineVariant")[0];
+        var selected = Number(dropdown.options[dropdown.selectedIndex].value);
+        var descriptions = {
+          0: "Standard Turing machine with tape infinite in both directions",
+          1: "Turing machine with tape infinite in one direction only (as used in, eg, <a href='http://math.mit.edu/~sipser/book.html'>Sipser</a>)",
+          2: "Non-deterministic Turing machine which allows multiple rules for the same state and symbol pair, and chooses one at random"
+        };
+        $("#MachineVariantDescription").html( descriptions[selected] );
+        if( needWarning ) this.ShowResetMsg(true);
+      },
     moveTapeRight() {
         translateRight(this.$refs.MachineHead, 10)
 
     },
+    SetSyntaxMessage( msg )
+    {
+      $("#SyntaxMsg").text( (msg?msg:"") )
+    },
+    SetStatusMessage( sString )
+    {
+      $( "#MachineStatusMsgText" ).text( sString );
+      // if( nBgFlash > 0 ) {
+      //   $("#MachineStatusMsgBg").stop(true, true).css("background-color",(nBgFlash==1?"#c9f2c9":"#ffb3b3")).show().fadeOut(600);
+      // }
+      // if( sString != "" && sPreviousStatusMsg == sString && nBgFlash != -1 ) {
+      //   $("#MachineStatusMsgBg").stop(true, true).css("background-color","#bbf8ff").show().fadeOut(600);
+      // }
+      // if( sString != "" ) sPreviousStatusMsg = sString;
+    },
+    debug ( n, str )
+    {
+      if( n <= 0 ) {
+        // SetStatusMessage( str, null);
+        console.log( str );
+      }
+      if( nDebugLevel >= n  ) {
+        $("#debug").append( document.createTextNode( str + "\n" ) );
+        console.log( str );
+      }
+    },
+    ClearErrorLines() {
+      $(".talinebg").removeClass('talinebgerror');
+    },  
+    SetErrorLine( num )
+    {
+      $("#talinebg"+(num+1)).addClass('talinebgerror');
+    },
     Compile()
     {
       var sSource = oTextarea.value;
-      debug( 2, "Compile()" );
+      // debug( 2, "Compile()" );
       
       /* Clear syntax error messages */
-      SetSyntaxMessage( null );
-      ClearErrorLines();
+      // SetSyntaxMessage( null );
+      this.ClearErrorLines();
       
       /* clear the old program */
       aProgram = new Object;
@@ -156,30 +290,30 @@ export default {
       var aLines = sSource.split("\n");
       for( var i = 0; i < aLines.length; i++ )
       {
-        var oTuple = ParseLine( aLines[i], i );
+        var oTuple = this.ParseLine( aLines[i], i );
         if( oTuple.isValid ) {
-          debug( 5, " Parsed tuple: '" + oTuple.currentState + "'  '" + oTuple.currentSymbol + "'  '" + oTuple.newSymbol + "'  '" + oTuple.action + "'  '" + oTuple.newState + "'" );
+          this.debug( 5, " Parsed tuple: '" + oTuple.currentState + "'  '" + oTuple.currentSymbol + "'  '" + oTuple.newSymbol + "'  '" + oTuple.action + "'  '" + oTuple.newState + "'" );
           if( aProgram[oTuple.currentState] == null ) aProgram[oTuple.currentState] = new Object;
           if( aProgram[oTuple.currentState][oTuple.currentSymbol] == null ) {
             aProgram[oTuple.currentState][oTuple.currentSymbol] = [];
           }
           if( aProgram[oTuple.currentState][oTuple.currentSymbol].length > 0 && nVariant != 2 ) {
             // Multiple conflicting instructions found.
-            debug( 1, "Warning: multiple definitions for state '" + oTuple.currentState + "' symbol '" + oTuple.currentSymbol + "' on lines " + (aProgram[oTuple.currentState][oTuple.currentSymbol][0].sourceLineNumber+1) + " and " + (i+1) );
-            SetSyntaxMessage( "Warning: Multiple definitions for state '" + oTuple.currentState + "' symbol '" + oTuple.currentSymbol + "' on lines " + (aProgram[oTuple.currentState][oTuple.currentSymbol][0].sourceLineNumber+1) + " and " + (i+1) );
-            SetErrorLine( i );
-            SetErrorLine( aProgram[oTuple.currentState][oTuple.currentSymbol][0].sourceLineNumber );
-            aProgram[oTuple.currentState][oTuple.currentSymbol][0] = createTuringInstructionFromTuple( oTuple, i );
+            this.debug( 1, "Warning: multiple definitions for state '" + oTuple.currentState + "' symbol '" + oTuple.currentSymbol + "' on lines " + (aProgram[oTuple.currentState][oTuple.currentSymbol][0].sourceLineNumber+1) + " and " + (i+1) );
+            this.SetSyntaxMessage( "Warning: Multiple definitions for state '" + oTuple.currentState + "' symbol '" + oTuple.currentSymbol + "' on lines " + (aProgram[oTuple.currentState][oTuple.currentSymbol][0].sourceLineNumber+1) + " and " + (i+1) );
+            this.SetErrorLine( i );
+            this.SetErrorLine( aProgram[oTuple.currentState][oTuple.currentSymbol][0].sourceLineNumber );
+            aProgram[oTuple.currentState][oTuple.currentSymbol][0] = this.createTuringInstructionFromTuple( oTuple, i );
           } else {
-            aProgram[oTuple.currentState][oTuple.currentSymbol].push( createTuringInstructionFromTuple( oTuple, i ) );
+            aProgram[oTuple.currentState][oTuple.currentSymbol].push( this.createTuringInstructionFromTuple( oTuple, i ) );
           }
         }
         else if( oTuple.error )
         {
           /* Syntax error */
-          debug( 2, "Syntax error: " + oTuple.error );
-          SetSyntaxMessage( oTuple.error );
-          SetErrorLine( i );
+          this.debug( 2, "Syntax error: " + oTuple.error );
+          this.SetSyntaxMessage( oTuple.error );
+          this.SetErrorLine( i );
         }
       }
       
@@ -190,17 +324,25 @@ export default {
         var nNewDebugLevel = parseInt( aResult[1] );
         if( nNewDebugLevel != nDebugLevel ) {
           nDebugLevel = parseInt( aResult[1] );
-          debug( 1, "Setting debug level to " + nDebugLevel );
+          this.debug( 1, "Setting debug level to " + nDebugLevel );
           if( nDebugLevel > 0 ) $(".DebugClass").toggle( true );
         }
       }
       
-      /* Lines have changed. Previous line is no longer meaningful, recalculate next line. */
-      oPrevInstruction = null;
       
       bIsDirty = false;
       
-      UpdateInterface();
+      this.UpdateInterface();
+    },
+    createTuringInstructionFromTuple( tuple, line )
+    {
+      return {
+        newSymbol: tuple.newSymbol,
+        action: tuple.action,
+        newState: tuple.newState,
+        sourceLineNumber: line,
+        breakpoint: tuple.breakpoint
+      };
     },
     RunButton(){
       // RunButton()
@@ -208,25 +350,44 @@ export default {
       console.log(bIsReset)
       console.log(bFullSpeed)
     },
+    GetNextInstructions( sState, sHeadSymbol )
+    {
+      var result = null;
+      if( aProgram[sState] != null && aProgram[sState][sHeadSymbol] != null ) {
+        /* Use instructions specifically corresponding to current state & symbol, if any */
+        return( aProgram[sState][sHeadSymbol] );
+      } else if( aProgram[sState] != null && aProgram[sState]["*"] != null ) {
+        /* Next use rules for the current state and default symbol, if any */
+        return( aProgram[sState]["*"] );
+      } else if( aProgram["*"] != null && aProgram["*"][sHeadSymbol] != null ) {
+        /* Next use rules for default state and current symbol, if any */
+        return( aProgram["*"][sHeadSymbol] );
+      } else if( aProgram["*"] != null && aProgram["*"]["*"] != null ) {
+        /* Finally use rules for default state and default symbol */
+        return( aProgram["*"]["*"] );
+      } else {
+        return( [] );
+      }
+    },
     Step ()
     {
-      if( bIsDirty) Compile();
+      if( bIsDirty) this.Compile();
       
       bIsReset = false;
       if( sState.substring(0,4).toLowerCase() == "halt" ) {
         /* debug( 1, "Warning: Step() called while in halt state" ); */
-        SetStatusMessage( "Halted." );
-        EnableControls( false, false, false, true, true, true, true );
+        this.SetStatusMessage( "Halted." );
+        this.EnableControls( false, false, false, true, true, true, true );
         return( false );
       }
       
       var sNewState, sNewSymbol, nAction, nLineNumber;
       
       /* Get current symbol */
-      var sHeadSymbol = GetTapeSymbol( nHeadPosition );
+      var sHeadSymbol = this.GetTapeSymbol( nHeadPosition );
       
       /* Find appropriate TM instruction */
-      var aInstructions = GetNextInstructions( sState, sHeadSymbol );
+      var aInstructions = this.GetNextInstructions( sState, sHeadSymbol );
       var oInstruction;
       if( aInstructions.length == 0 ) {
         // No matching instruction found. Error handled below.
@@ -249,8 +410,8 @@ export default {
         nLineNumber = oInstruction.sourceLineNumber;
       } else {
         /* No matching rule found; halt */
-        debug( 1, "Warning: no instruction found for state '" + sState + "' symbol '" + sHeadSymbol + "'; halting" );
-        SetStatusMessage( "Halted. No rule for state '" + sState + "' and symbol '" + sHeadSymbol + "'.", 2 );
+        this.debug( 1, "Warning: no instruction found for state '" + sState + "' symbol '" + sHeadSymbol + "'; halting" );
+        this.SetStatusMessage( "Halted. No rule for state '" + sState + "' and symbol '" + sHeadSymbol + "'.", 2 );
         sNewState = "halt";
         sNewSymbol = sHeadSymbol;
         nAction = 0;
@@ -264,46 +425,133 @@ export default {
       }
       
       /* Update machine tape & state */
-      SetTapeSymbol( nHeadPosition, sNewSymbol );
+      this.SetTapeSymbol( nHeadPosition, sNewSymbol );
       sState = sNewState;
       nHeadPosition += nAction;
       
       nSteps++;
       
-      oPrevInstruction = oInstruction;
       
-      debug( 4, "Step() finished. New tape: '" + sTape + "'  new state: '" + sState + "'  action: " + nAction + "  line number: " + nLineNumber  );
-      UpdateInterface();
+      this.debug( 4, "Step() finished. New tape: '" + sTape + "'  new state: '" + sState + "'  action: " + nAction + "  line number: " + nLineNumber  );
+      this.UpdateInterface();
       
       if( sNewState.substring(0,4).toLowerCase() == "halt" ) {
         if( oInstruction != null ) {
-          SetStatusMessage( "Halted." );
+          this.SetStatusMessage( "Halted." );
         } 
-        EnableControls( false, false, false, true, true, true, true );
+        this.EnableControls( false, false, false, true, true, true, true );
         return( false );
       } else {
         if( oInstruction.breakpoint ) {
-          SetStatusMessage( "Stopped at breakpoint on line " + (nLineNumber+1) );
-          EnableControls( true, true, false, true, true, true, true );
+          this.SetStatusMessage( "Stopped at breakpoint on line " + (nLineNumber+1) );
+          this.EnableControls( true, true, false, true, true, true, true );
           return( false );
         } else {
           return( true );
         }
       }
     },
+    ParseLine( sLine, nLineNum )
+    {
+      /* discard anything following ';' */
+      this.debug( 5, "ParseLine( " + sLine + " )" );
+      sLine = sLine.split( ";", 1 )[0];
+
+      /* split into tokens - separated by tab or space */
+      var aTokens = sLine.split(/\s+/);
+      aTokens = aTokens.filter( function (arg) { return( arg != "" ) ;} );
+    /*	debug( 5, " aTokens.length: " + aTokens.length );
+      for( var j in aTokens ) {
+        debug( 1, "  aTokens[ " + j + " ] = '" + aTokens[j] + "'" );
+      }*/
+
+      var oTuple = new Object;
+      
+      if( aTokens.length == 0 )
+      {
+        /* Blank or comment line */
+        oTuple.isValid = false;
+        return( oTuple );
+      }
+      
+      oTuple.currentState = aTokens[0];
+      
+      if( aTokens.length < 2 ) {
+        oTuple.isValid = false;
+        oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": missing <current symbol>!" ;
+        return( oTuple );
+      }
+      if( aTokens[1].length > 1 ) {
+        oTuple.isValid = false;
+        oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": <current symbol> should be a single character!" ;
+        return( oTuple );
+      }
+      oTuple.currentSymbol = aTokens[1];
+      
+      if( aTokens.length < 3 ) {
+        oTuple.isValid = false;
+        oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": missing <new symbol>!" ;
+        return( oTuple );
+      }
+      if( aTokens[2].length > 1 ) {
+        oTuple.isValid = false;
+        oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": <new symbol> should be a single character!" ;
+        return( oTuple );
+      }
+      oTuple.newSymbol = aTokens[2];
+      
+      if( aTokens.length < 4 ) {
+        oTuple.isValid = false;
+        oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": missing <direction>!" ;
+        return( oTuple );
+      }
+      if( ["l","r","*"].indexOf( aTokens[3].toLowerCase() ) < 0 ) {
+        oTuple.isValid = false;
+        oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": <direction> should be 'l', 'r' or '*'!";
+        return( oTuple );
+      }
+      oTuple.action = aTokens[3].toLowerCase();
+
+      if( aTokens.length < 5 ) {
+        oTuple.isValid = false;
+        oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": missing <new state>!" ;
+        return( oTuple );
+      }
+      oTuple.newState = aTokens[4];
+      
+      if( aTokens.length > 6 ) {
+        oTuple.isValid = false;
+        oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": too many entries!" ;
+        return( oTuple );
+      }
+      if( aTokens.length == 6 ) {		/* Anything other than '!' in position 6 is an error */
+        if( aTokens[5] == "!" ) {
+          oTuple.breakpoint = true;
+        } else {
+          oTuple.isValid = false;
+          oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": too many entries!";
+          return( oTuple );
+        }
+      } else {
+        oTuple.breakpoint = false;
+      }
+
+      oTuple.isValid = true;
+      return( oTuple );
+    },
     Run () {
       var bContinue = true;
       if( bFullSpeed ) {
         /* Run 25 steps at a time in fast mode */
         for( var i = 0; bContinue && i < 25; i++ ) {
-          bContinue = Step();
+          bContinue = this.Step();
         }
-        if( bContinue ) hRunTimer = window.setTimeout( Run, 10 );
-        else UpdateInterface();   /* Sometimes updates get lost at full speed... */
+        if( bContinue ) hRunTimer = window.setTimeout( this.Run, 10 );
+        else this.UpdateInterface();   /* Sometimes updates get lost at full speed... */
       } else {
         /* Run a single step every 50ms in slow mode */
-          if( Step() ) {
-            hRunTimer = window.setTimeout( Run, 50 );
+          if( this.Step() ) {
+            hRunTimer = window.setTimeout( this.Run, 50 );
           }
         }
     },
