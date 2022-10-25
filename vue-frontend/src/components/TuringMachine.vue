@@ -91,9 +91,37 @@
 <script>
 import { translateRight } from "./animate"
 // import JQuery from 'jquery'
-import $ from 'jquery' 
-import { RunButton } from "./js-turing"
+// import $ from 'jquery' 
+// import { RunButton } from "./js-turing"
 // window.$ = JQuery 
+
+let nDebugLevel = 0;
+let bFullSpeed = false;	/* If true, run at full speed with no delay between steps */
+let bIsReset = false;		/* true if the machine has been reset, false if it is or has been running */
+// let sTape = "";				/* Contents of TM's tape. Stores all cells that have been visited by the head */
+// let nTapeOffset = 0;		/* the logical position on TM tape of the first character of sTape */
+// let nHeadPosition = 0;		/* the position of the TM's head on its tape. Initially zero; may be negative if TM moves to left */
+// let sState = "0";
+// let nSteps = 0;
+// let nVariant = 0; /* Machine variant. 0 = standard infinite tape, 1 = tape infinite in one direction only, 2 = non-deterministic TM */
+// let hRunTimer = null;
+// let aProgram = new Object();
+//     /* aProgram is a double asociative array, indexed first by state then by symbol.
+//       Its members are arrays of objects with properties newSymbol, action, newState, breakpoint and sourceLineNumber.
+//     */
+
+// let nMaxUndo = 10;  /* Maximum number of undo steps */
+// let aUndoList = [];
+//     /* aUndoList is an array of 'deltas' in the form {previous-state, direction, previous-symbol}. */
+
+//     /* Variables for the source line numbering, markers */
+// let nTextareaLines = "";
+// let oTextarea = "";
+// let bIsDirty = true;	/* If true, source must be recompiled before running machine */
+// let oNextLineMarker = $("<div class='NextLineMarker'>Next<div class='NextLineMarkerEnd'></div></div>");
+// let oPrevLineMarker = $("<div class='PrevLineMarker'>Prev<div class='PrevLineMarkerEnd'></div></div>");
+// let oPrevInstruction = "";
+// let sPreviousStatusMsg = "";
 
 export default {
   name: 'TuringMachine',
@@ -102,33 +130,7 @@ export default {
   },
   data() {
     return {
-        nDebugLevel : Boolean = 0,
-      bFullSpeed : Boolean = false,	/* If true, run at full speed with no delay between steps */
-      bIsReset : Boolean = false,		/* true if the machine has been reset, false if it is or has been running */
-      sTape : Number = "",				/* Contents of TM's tape. Stores all cells that have been visited by the head */
-      nTapeOffset : Number = 0,		/* the logical position on TM tape of the first character of sTape */
-      nHeadPosition : Number = 0,		/* the position of the TM's head on its tape. Initially zero; may be negative if TM moves to left */
-      sState : String = "0",
-      nSteps : Number = 0,
-      nVariant : Number = 0, /* Machine variant. 0 = standard infinite tape, 1 = tape infinite in one direction only, 2 = non-deterministic TM */
-      hRunTimer : Number = null,
-      aProgram : Object = new Object(),
-    /* aProgram is a double asociative array, indexed first by state then by symbol.
-      Its members are arrays of objects with properties newSymbol, action, newState, breakpoint and sourceLineNumber.
-    */
-
-      nMaxUndo : Number = 10,  /* Maximum number of undo steps */
-      aUndoList : Array,
-    /* aUndoList is an array of 'deltas' in the form {previous-state, direction, previous-symbol}. */
-
-    /* Variables for the source line numbering, markers */
-      nTextareaLines : String,
-      oTextarea : String,
-      bIsDirty : true	/* If true, source must be recompiled before running machine */,
-      oNextLineMarker : $("<div class='NextLineMarker'>Next<div class='NextLineMarkerEnd'></div></div>"),
-      oPrevLineMarker : $("<div class='PrevLineMarker'>Prev<div class='PrevLineMarkerEnd'></div></div>"),
-      oPrevInstruction : String,
-      sPreviousStatusMsg : String
+      
     }
    
   },
@@ -138,7 +140,10 @@ export default {
 
     },
     RunButton(){
-      RunButton()
+      // RunButton()
+      console.log(nDebugLevel)
+      console.log(bIsReset)
+      console.log(bFullSpeed)
     }
   }
 }
