@@ -112,6 +112,7 @@
 import { translateRight } from "./animate"
 // import JQuery from 'jquery'
 import $ from 'jquery' 
+import palindromeProgram from "../machines/palindrome.txt"
 // import { RunButton } from "./js-turing"
 // window.$ = JQuery 
 
@@ -169,6 +170,81 @@ export default {
         window.clearInterval( hRunTimer );
         hRunTimer = null;
       }
+    },
+    LoadFromCloud( sID )
+    {
+      var n = sID.indexOf('&');
+      sID = sID.substring(0, n != -1 ? n : sID.length);
+
+      /* Get data from github */
+      $.ajax({
+        url: "https://api.github.com/gists/" + sID,
+        type: "GET",
+        dataType: "json",
+        success: () => { this.loadSuccessCallback },
+        error: () => { this.loadErrorCallback }
+      });
+    },
+    loadErrorCallback( oData, sStatus, oRequestObj )
+    {
+      this.debug( 1, "Error: Load failed. AJAX request to Github failed. HTTP response " + oRequestObj );
+      this.SetStatusMessage( "Error loading saved machine :(", 2 );
+    },
+    loadSuccessCallback( oData )
+    {
+      if( !oData || !oData.files || !oData.files["machine.json"] || !oData.files["machine.json"].content ) {
+        this.debug( 1, "Error: Load AJAX request succeeded but can't find expected data." );
+        this.SetStatusMessage( "Error loading saved machine :(", 2 );
+        return;
+      }
+      var oUnpackedObject;
+      try {
+        oUnpackedObject = JSON.parse( oData.files["machine.json"].content );
+      } catch( e ) {
+        this.debug( 1, "Error: Exception when unpacking JSON: " + e );
+        this.SetStatusMessage( "Error loading saved machine :(", 2 );
+        return;
+      }
+      this.LoadMachineSnapshot( oUnpackedObject );
+    },
+    LoadMachineSnapshot( oObj )
+    {
+      if( oObj.version && oObj.version != 1 ) this.debug( 1, "Warning: saved machine has unknown version number " + oObj.version );
+      if( oObj.program ) oTextarea.value = oObj.program;
+      if( oObj.state ) sState = oObj.state;
+      if( oObj.tape ) sTape = oObj.tape;
+      if( oObj.tapeoffset ) nTapeOffset = oObj.tapeoffset;
+      if( oObj.headposition ) nHeadPosition = oObj.headposition;
+      if( oObj.steps ) nSteps = oObj.steps;
+      if( oObj.initialtape ) $("#InitialInput")[0].value = oObj.initialtape;
+      if( oObj.initialstate ) {
+        $("#InitialState")[0].value = oObj.initialstate;
+      } else {
+        $("#InitialState")[0].value = "";
+      }
+      if( oObj.fullspeed ) {
+        $("#SpeedCheckbox")[0].checked = oObj.fullspeed;
+        bFullSpeed = oObj.fullspeed;
+      }
+      if( oObj.variant ) {
+        nVariant = oObj.variant;
+      } else {
+        nVariant = 0;
+      }
+      $("#MachineVariant").val(nVariant);
+      this.VariantChanged(false);
+      this.SetupVariantCSS();
+      aUndoList = [];
+      if( sState.substring(0,4).toLowerCase() == "halt" ) {
+        this.SetStatusMessage( "Machine loaded. Halted.", 1 );
+        this.EnableControls( false, false, false, true, true, true, true );
+      } else {
+        this.SetStatusMessage( "Machine loaded and ready", 1  );
+        this.EnableControls( true, true, false, true, true, true, true );
+      }
+      this.TextareaChanged();
+      this.Compile();
+      this.UpdateInterface();
     },
     Undo ()
     {
@@ -342,6 +418,8 @@ export default {
         type: "GET",
         dataType: "text",
         success: ( sData ) => {
+          
+          sData = palindromeProgram;
           /* Load the default initial tape, if any */
           var oRegExp = new RegExp( ";.*\\$INITIAL_TAPE:? *(.+)$" );
           var aRegexpResult = oRegExp.exec( sData );
@@ -485,6 +563,7 @@ export default {
     },
     OnLoad () 
     {
+        console.log(palindromeProgram);
         if( nDebugLevel > 0 ) $(".DebugClass").toggle( true );
         
         if( typeof( isOldIE ) != "undefined" ) {
