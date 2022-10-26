@@ -10,20 +10,40 @@
           </div> <!-- div MachineTape !-->
         </div>
 
+        <div id="MachineProgramContainer">
+          <div class="BoxTitle">Turing machine program</div>
+              <div id="MachineProgramBlock">
+              <div id="MachineProgramBlock2">
+                <div id="SourceContainer">
+                <div id="SourceBackground">
+                </div>
+                <div id="tabackground">
+                <!-- no indenting, because text inside textarea is verbatim !-->
+                <!-- @keypress="TextareaChanged" -->
+                <textarea id="Source" wrap="off"  oninput="TextareaChanged();" onscroll="UpdateTextareaScroll();" onblur="Compile();" title="This is the Turing machine's program. See documentation below for syntax.">
+                ; Load a program from the menu or write your own!
+                </textarea>
+                </div>
+                </div>
+                <div id="SyntaxMsg"></div>
+              </div> <!-- div MachineProgramBlock2 !-->
+          </div> <!-- div MachineProgramBlock !-->
+        </div> <!-- div MachineProgramContainer !--> 
+
         <button @click="moveTapeRight">Start</button>
     <div class="controls-section">
       <div id="MachineControlBlock">
             <div class="BoxTitle">Controls</div>
             <div id="MachineButtonsBlock">
-            <button id="RunButton" onclick="RunButton();" title="Start the machine running">Run</button> <!-- &#x25b8; !--> <!-- Unicode 'play' symbol !-->
+            <button id="RunButton" @click="RunButton" title="Start the machine running">Run</button> <!-- &#x25b8; !--> <!-- Unicode 'play' symbol !-->
             <span title="If enabled, runs as fast as your browser &amp; computer allow">
-              <input type="checkbox" id="SpeedCheckbox" onclick="SpeedCheckbox();">Run at full speed
+              <input type="checkbox" id="SpeedCheckbox" @click="SpeedCheckbox">Run at full speed
             </span>
             <br>
-            <button id="StopButton" onclick="StopButton();" disabled="disabled" title="Pause the machine when running">Pause</button><br> <!-- &#x25fe; !-->
-            <button id="UndoButton" onclick="Undo();" title="Undo one machine step" style="float: right;">Undo</button>
-            <button id="StepButton" onclick="StepButton();" title="Run the machine for a single step and the pause">Step</button><br> <!-- &#x25b8;&#x2759; !-->
-            <button id="ResetButton" onclick="ResetButton();" title="Reset the machine and tape to the initial state">Reset</button> <!-- &#x2759;&#x23ea; !-->
+            <button id="StopButton" @click="StopButton" disabled="disabled" title="Pause the machine when running">Pause</button><br> <!-- &#x25fe; !-->
+            <button id="UndoButton" @click="Undo" title="Undo one machine step" style="float: right;">Undo</button>
+            <button id="StepButton" @click="StepButton" title="Run the machine for a single step and the pause">Step</button><br> <!-- &#x25b8;&#x2759; !-->
+            <button id="ResetButton" @click="ResetButton" title="Reset the machine and tape to the initial state">Reset</button> <!-- &#x2759;&#x23ea; !-->
             <div id="InitialTapeDisplay"  title="This initial data will be loaded on the tape when the machine starts">
               Initial input:<input type="text" id="InitialInput" value="" onchange="ShowResetMsg(true);">
             </div>
@@ -36,7 +56,7 @@
               </div>
               <div title="Choose between different Turing machine variants">
               Machine variant:
-              <select onchange="VariantChanged(true);" id="MachineVariant">
+              <select @select="VariantChanged(true);" id="MachineVariant">
                 <option value="0" selected="selected">Standard</option>
                 <option value="1">Semi-infinite tape</option>
                 <option value="2">Non-deterministic</option>
@@ -123,6 +143,7 @@ let oRegExp = new RegExp();
 // let oNextLineMarker = $("<div class='NextLineMarker'>Next<div class='NextLineMarkerEnd'></div></div>");
 // let oPrevLineMarker = $("<div class='PrevLineMarker'>Prev<div class='PrevLineMarkerEnd'></div></div>");
 // let sPreviousStatusMsg = "";
+let oPrevInstruction = "";
 
 export default {
   name: 'TuringMachine',
@@ -131,10 +152,16 @@ export default {
   },
   data() {
     return {
-      
+      nSteps, bIsReset, oPrevInstruction
     }
    
   },
+  mounted: function(){
+    this.$nextTick(function(){
+      // Will be executed when the DOM is ready 
+      this.OnLoad()
+    })
+  }, 
   methods: {
     StopTimer()
     {
@@ -142,6 +169,66 @@ export default {
         window.clearInterval( hRunTimer );
         hRunTimer = null;
       }
+    },
+    Undo ()
+    {
+      var oUndoData = aUndoList.pop();
+      if( oUndoData ) {
+        nSteps--;
+        sState = oUndoData.state;
+        nHeadPosition = oUndoData.position;
+        this.SetTapeSymbol( nHeadPosition, oUndoData.symbol );
+        oPrevInstruction = null;
+        this.debug( 3, "Undone one step. New state: '" + sState + "' position : " + nHeadPosition + " symbol: '" + oUndoData.symbol + "'" );
+        this.EnableControls( true, true, false, true, true, true, true );
+        this.SetStatusMessage( "Undone one step." /*+ (aUndoList.length == 0 ? " No more undoes available." : " (" + aUndoList.length + " remaining)")*/ );
+        this.UpdateInterface();
+      } else {
+        this.debug( 1, "Warning: Tried to undo with no undo data available!" );
+      }
+    },
+    StopButton()
+    {
+      if( hRunTimer != null ) {
+        this.SetStatusMessage( "Paused; click 'Run' or 'Step' to resume." );
+        this.EnableControls( true, true, false, true, true, true, true );
+        this.StopTimer();
+      }
+    },
+    StepButton()
+    {
+      this.SetStatusMessage( "", -1 );
+      this.Step();
+      this.EnableUndoButton(true);
+    },
+    ResetButton()
+    {
+      this.SetStatusMessage( "Machine reset. Click 'Run' or 'Step' to start." );
+      this.Reset();
+      this.EnableControls( true, true, false, true, true, true, false );
+    },
+    EnableControls( bStep, bRun, bStop, bReset, bSpeed, bTextarea, bUndo )
+    {
+      document.getElementById('StepButton').disabled = !bStep;
+      document.getElementById('RunButton').disabled = !bRun;
+      document.getElementById('StopButton').disabled = !bStop;
+      document.getElementById('ResetButton').disabled = !bReset;
+      document.getElementById('SpeedCheckbox').disabled = !bSpeed;
+      document.getElementById('Source').disabled = !bTextarea;
+      this.EnableUndoButton(bUndo);
+      if( bSpeed ) {
+        $( "#SpeedCheckboxLabel" ).removeClass( "disabled" );
+      } else {
+        $( "#SpeedCheckboxLabel" ).addClass( "disabled" );
+      }
+    },
+    EnableUndoButton(bUndo)
+    {
+      document.getElementById( 'UndoButton' ).disabled = !(bUndo && aUndoList.length > 0);
+    },
+    SpeedCheckbox ()
+    {
+      bFullSpeed = $( '#SpeedCheckbox' )[0].checked;
     },
     GetTapeSymbol( n )
     {
@@ -157,10 +244,10 @@ export default {
     },
     UpdateInterface()
     {
-      // this.RenderTape();
-      // this.RenderState();
-      // this.RenderSteps();
-      // this.RenderLineMarkers();
+      this.RenderTape();
+      this.RenderState();
+      this.RenderSteps();
+      this.RenderLineMarkers();
     },
     LoadSampleProgram( zName, zFriendlyName, bInitial ){
       this.debug( 1, "Load '" + zName + "'" );
@@ -206,36 +293,23 @@ export default {
       $("#LoadMenu").slideUp();
       this.ClearSaveMessage();
     },
+    VariantChanged(needWarning)
+    {
+      var dropdown = $("#MachineVariant")[0];
+      var selected = Number(dropdown.options[dropdown.selectedIndex].value);
+      var descriptions = {
+        0: "Standard Turing machine with tape infinite in both directions",
+        1: "Turing machine with tape infinite in one direction only (as used in, eg, <a href='http://math.mit.edu/~sipser/book.html'>Sipser</a>)",
+        2: "Non-deterministic Turing machine which allows multiple rules for the same state and symbol pair, and chooses one at random"
+      };
+      $("#MachineVariantDescription").html( descriptions[selected] );
+      if( needWarning ) this.ShowResetMsg(true);
+    },
     ClearSaveMessage()
     {
       $("#SaveStatusMsg").empty();
       $("#SaveStatus").hide();
     },
-    TextareaChanged()
-    {
-      /* Update line numbers only if number of lines has changed */
-      var nNewLines = (oTextarea.value.match(/\n/g) ? oTextarea.value.match(/\n/g).length : 0) + 1;
-      if( nNewLines != nTextareaLines ) {
-        nTextareaLines = nNewLines
-        this.UpdateTextareaDecorations();
-      }
-      
-    //	Compile();
-      bIsDirty = true;
-      this.RenderLineMarkers();
-    },
-    VariantChanged(needWarning)
-      {
-        var dropdown = $("#MachineVariant")[0];
-        var selected = Number(dropdown.options[dropdown.selectedIndex].value);
-        var descriptions = {
-          0: "Standard Turing machine with tape infinite in both directions",
-          1: "Turing machine with tape infinite in one direction only (as used in, eg, <a href='http://math.mit.edu/~sipser/book.html'>Sipser</a>)",
-          2: "Non-deterministic Turing machine which allows multiple rules for the same state and symbol pair, and chooses one at random"
-        };
-        $("#MachineVariantDescription").html( descriptions[selected] );
-        if( needWarning ) this.ShowResetMsg(true);
-      },
     moveTapeRight() {
         translateRight(this.$refs.MachineHead, 10)
 
@@ -273,6 +347,103 @@ export default {
     {
       $("#talinebg"+(num+1)).addClass('talinebgerror');
     },
+    OnLoad () 
+    {
+        if( nDebugLevel > 0 ) $(".DebugClass").toggle( true );
+        
+        if( typeof( isOldIE ) != "undefined" ) {
+          this.debug( 1, "Old version of IE detected, adding extra textarea events" );
+          /* Old versions of IE need onkeypress event for textarea as well as onchange */
+          $("#Source").on( "keypress change", this.TextareaChanged);
+        }
+
+        oTextarea = $("#Source")[0];
+        this.TextareaChanged();
+        
+        this.VariantChanged(false); /* Set up variant description */
+        
+        if( window.location.search != "" ) {
+          this.SetStatusMessage( "Loading saved machine..." );
+          this.LoadFromCloud( window.location.search.substring( 1 ) );
+          window.history.replaceState( null, "", window.location.pathname );  /* Remove query string from URL */
+        } else {
+          this.LoadSampleProgram( 'palindrome', 'Default program', true );
+          this.SetStatusMessage( 'Load or write a Turing machine program and click Run!' );
+        }
+      },
+    TextareaChanged()
+    {
+      /* Update line numbers only if number of lines has changed */
+      var nNewLines = (oTextarea.value.match(/\n/g) ? oTextarea.value.match(/\n/g).length : 0) + 1;
+      if( nNewLines != nTextareaLines ) {
+        nTextareaLines = nNewLines
+        this.UpdateTextareaDecorations();
+      }
+      
+    //	Compile();
+      bIsDirty = true;
+      oPrevInstruction = null;
+      this.RenderLineMarkers();
+    },
+    UpdateTextareaDecorations()
+    {
+      var oBackgroundDiv = $("#SourceBackground");
+      
+      oBackgroundDiv.empty();
+      
+      var sSource = oTextarea.value;
+      sSource = sSource.replace( /\r/g, "" );	/* Internet Explorer uses \n\r, other browsers use \n */
+      
+      var aLines = sSource.split("\n");
+      
+      for( var i = 0; i < aLines.length; i++)
+      {
+        oBackgroundDiv.append($("<div id='talinebg"+(i+1)+"' class='talinebg'><div class='talinenum'>"+(i+1)+"</div></div>"));
+      }
+      
+      this.UpdateTextareaScroll();
+    },
+    UpdateTextareaScroll ()
+    {
+      var oBackgroundDiv = $("#SourceBackground");
+      
+      $(oBackgroundDiv).css( {'margin-top': (-1*$(oTextarea).scrollTop()) + "px"} );
+    },
+    RenderLineMarkers()
+    {
+      var oNextList = $.map(this.GetNextInstructions( sState, this.GetTapeSymbol( nHeadPosition ) ), function(x){return(x.sourceLineNumber);} );
+      this.debug( 3, "Rendering line markers: " + (oNextList) + " " + (oPrevInstruction?oPrevInstruction.sourceLineNumber:-1) );
+      this.SetActiveLines( oNextList, (oPrevInstruction?oPrevInstruction.sourceLineNumber:-1) );
+    },
+    SetActiveLines( next, prev )
+    {
+        $(".talinebgnext").removeClass('talinebgnext');
+        $(".NextLineMarker").remove();
+        $(".talinebgprev").removeClass('talinebgprev');
+        $(".PrevLineMarker").remove();
+        
+        var shift = false;
+        var oMarker = null;
+        for( var i = 0; i < next.length; i++ )
+        {
+          oMarker = $("<div class='NextLineMarker'>Next<div class='NextLineMarkerEnd'></div></div>");
+          $("#talinebg"+(next[i]+1)).addClass('talinebgnext').prepend(oMarker);
+          if( next[i] == prev ) {
+            oMarker.addClass('shifted');
+            shift = true;
+          }
+        }
+        if( prev >= 0 )
+        {
+          oMarker = $("<div class='PrevLineMarker'>Prev<div class='PrevLineMarkerEnd'></div></div>");
+          if( shift ) {
+            $("#talinebg"+(prev+1)).prepend(oMarker);
+            oMarker.addClass('shifted');
+          } else {
+            $("#talinebg"+(prev+1)).addClass('talinebgprev').prepend(oMarker);
+          }
+        }
+      },
     Compile()
     {
       var sSource = oTextarea.value;
@@ -344,15 +515,16 @@ export default {
         breakpoint: tuple.breakpoint
       };
     },
-    RunButton(){
-      // RunButton()
-      console.log(nDebugLevel)
-      console.log(bIsReset)
-      console.log(bFullSpeed)
+    RunButton () {
+      this.SetStatusMessage( "Running..." );
+      /* Make sure that the step interval is up-to-date */
+      this.SpeedCheckbox();
+      this.EnableControls( false, false, true, false, false, false, false );
+      this.Run();
     },
     GetNextInstructions( sState, sHeadSymbol )
     {
-      var result = null;
+      // var result = null;
       if( aProgram[sState] != null && aProgram[sState][sHeadSymbol] != null ) {
         /* Use instructions specifically corresponding to current state & symbol, if any */
         return( aProgram[sState][sHeadSymbol] );
