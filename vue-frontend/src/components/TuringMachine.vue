@@ -249,6 +249,87 @@ export default {
       this.RenderSteps();
       this.RenderLineMarkers();
     },
+    RenderTape()
+    {
+      /* calculate the strings:
+        sFirstPart is the portion of the tape to the left of the head
+        sHeadSymbol is the symbol under the head
+        sSecondPart is the portion of the tape to the right of the head
+      */
+      var nTranslatedHeadPosition = nHeadPosition - nTapeOffset;  /* position of the head relative to sTape */
+      var sFirstPart, sHeadSymbol, sSecondPart;
+      this.debug( 4, "RenderTape: translated head pos: " + nTranslatedHeadPosition + "  head pos: " + nHeadPosition + "  tape offset: " + nTapeOffset );
+      this.debug( 4, "RenderTape: sTape = '" + sTape + "'" );
+
+      if( nTranslatedHeadPosition > 0 ) {
+        sFirstPart = sTape.substr( 0, nTranslatedHeadPosition );
+      } else {
+        sFirstPart = "";
+      }
+      if( nTranslatedHeadPosition > sTape.length ) {  /* Need to append blanks to sFirstPart.  Shouldn't happen but just in case. */
+        sFirstPart += this.repeat( " ", nTranslatedHeadPosition - sTape.length );
+      }
+      sFirstPart = sFirstPart.replace( /_/g, " " );
+      
+      if( nTranslatedHeadPosition >= 0 && nTranslatedHeadPosition < sTape.length ) {
+        sHeadSymbol = sTape.charAt( nTranslatedHeadPosition );
+      } else {
+        sHeadSymbol = " ";	/* Shouldn't happen but just in case */
+      }
+      sHeadSymbol = sHeadSymbol.replace( /_/g, " " );
+      
+      if( nTranslatedHeadPosition >= 0 && nTranslatedHeadPosition < sTape.length - 1 ) {
+        sSecondPart = sTape.substr( nTranslatedHeadPosition + 1 );
+      } else if( nTranslatedHeadPosition < 0 ) {  /* Need to prepend blanks to sSecondPart. Shouldn't happen but just in case. */
+        sSecondPart = this.repeat( " ", -nTranslatedHeadPosition - 1 ) + sTape;
+      } else {  /* nTranslatedHeadPosition > sTape.length */
+        sSecondPart = "";
+      }
+      sSecondPart = sSecondPart.replace( /_/g, " " );
+      
+      this.debug( 4, "RenderTape: sFirstPart = '" + sFirstPart + "' sHeadSymbol = '" + sHeadSymbol + "'  sSecondPart = '" + sSecondPart + "'" );
+      
+      /* Display the parts of the tape */
+      $("#LeftTape").text( sFirstPart );
+      $("#ActiveTape").text( sHeadSymbol );
+      $("#RightTape").text( sSecondPart );
+    //	debug( 4, "RenderTape(): LeftTape = '" + $("#LeftTape").text() + "' ActiveTape = '" + $("#ActiveTape").text() + "' RightTape = '" + $("#RightTape").text() + "'" );
+      
+      /* Scroll tape display to make sure that head is visible */
+      if( $("#ActiveTapeArea").position().left < 0 ) {
+        $("#MachineTape").scrollLeft( $("#MachineTape").scrollLeft() + $("#ActiveTapeArea").position().left - 10 );
+      } else if( $("#ActiveTapeArea").position().left + $("#ActiveTapeArea").width() > $("#MachineTape").width() ) {
+        $("#MachineTape").scrollLeft( $("#MachineTape").scrollLeft() + ($("#ActiveTapeArea").position().left - $("#MachineTape").width()) + 10 );
+      }
+    },
+    SetTapeSymbol( n, c )
+    {
+      this.debug( 4, "SetTapeSymbol( " + n + ", " + c + " ); sTape = '" + sTape + "' nTapeOffset = " + nTapeOffset );
+      if( c == " " ) { c = "_"; this.debug( 4, "Warning: SetTapeSymbol() with SPACE not _ !" ); }
+      
+      if( n < nTapeOffset ) {
+        sTape = c + this.repeat( "_", nTapeOffset - n - 1 ) + sTape;
+        nTapeOffset = n;
+      } else if( n > nTapeOffset + sTape.length ) {
+        sTape = sTape + this.repeat( "_", nTapeOffset + sTape.length - n - 1 ) + c;
+      } else {
+        sTape = sTape.substr( 0, n - nTapeOffset ) + c + sTape.substr( n - nTapeOffset + 1 );
+      }
+    },
+    repeat ( c, n )
+    {
+      var sTmp = "";
+      while( n-- > 0 ) sTmp += c;
+      return sTmp;
+    },
+    RenderState()
+    {
+      $("#MachineState").text( sState );
+    },
+    RenderSteps()
+    {
+      $("#MachineSteps").text( nSteps );
+    },
     LoadSampleProgram( zName, zFriendlyName, bInitial ){
       this.debug( 1, "Load '" + zName + "'" );
       this.SetStatusMessage( "Loading sample program..." );
@@ -304,6 +385,61 @@ export default {
       };
       $("#MachineVariantDescription").html( descriptions[selected] );
       if( needWarning ) this.ShowResetMsg(true);
+    },
+    Reset()
+    {
+      var sInitialTape = $("#InitialInput")[0].value;
+
+      /* Find the initial head location, if given */
+      nHeadPosition = sInitialTape.indexOf( "*" );
+      if( nHeadPosition == -1 ) nHeadPosition = 0;
+
+      /* Initialise tape */
+      sInitialTape = sInitialTape.replace( /\*/g, "" ).replace( / /g, "_" );
+      if( sInitialTape == "" ) sInitialTape = " ";
+      sTape = sInitialTape;
+      nTapeOffset = 0;
+      
+      /* Initialise state */
+      var sInitialState = $("#InitialState")[0].value;
+      sInitialState = $.trim( sInitialState ).split(/\s+/)[0];
+      if( !sInitialState || sInitialState == "" ) sInitialState = "0";
+      sState = sInitialState;
+      
+      /* Initialise variant */
+      var dropdown = $("#MachineVariant")[0];
+      nVariant = Number(dropdown.options[dropdown.selectedIndex].value);
+      this.SetupVariantCSS();
+      
+      nSteps = 0;
+      bIsReset = true;
+      
+      this.Compile();
+      oPrevInstruction = null;
+      
+      aUndoList = [];
+      
+      this.ShowResetMsg(false);
+      this.EnableControls( true, true, false, true, true, true, false );
+      this.UpdateInterface();
+    },
+    SetupVariantCSS()
+    {
+      if( nVariant == 1 ) {
+        $("#LeftTape").addClass( "OneDirectionalTape" );
+      } else {
+        $("#LeftTape").removeClass( "OneDirectionalTape" );
+      }
+    },
+    ShowResetMsg(b)
+    {
+      if( b ) {
+        $("#ResetMessage").fadeIn();
+        $("#ResetButton").addClass("glow");
+      } else {
+        $("#ResetMessage").hide();
+        $("#ResetButton").removeClass("glow");
+      }
     },
     ClearSaveMessage()
     {
