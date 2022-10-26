@@ -56,7 +56,7 @@
               </div>
               <div title="Choose between different Turing machine variants">
               Machine variant:
-              <select @select="VariantChanged(true);" id="MachineVariant">
+              <select @change="VariantChanged($event)" id="MachineVariant">
                 <option value="0" selected="selected">Standard</option>
                 <option value="1">Semi-infinite tape</option>
                 <option value="2">Non-deterministic</option>
@@ -260,7 +260,7 @@ export default {
         url: zFileName,
         type: "GET",
         dataType: "text",
-        success: function( sData ) {
+        success: ( sData ) => {
           /* Load the default initial tape, if any */
           var oRegExp = new RegExp( ";.*\\$INITIAL_TAPE:? *(.+)$" );
           var aRegexpResult = oRegExp.exec( sData );
