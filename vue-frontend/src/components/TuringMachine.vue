@@ -22,6 +22,8 @@
           </div> <!-- div MachineProgramBlock !-->
         </div> <!-- div MachineProgramContainer !--> 
 
+   
+
         <div id="MachineTapeContainer">
           <div class="BoxTitle">Tape</div>
           <div id="MachineTape" class="MachineStatusBox" title="This is the Turing machine's tape. The head position is indicated by the highlighted cell and arrow.">
@@ -31,6 +33,22 @@
         </div>
 
        
+        <div id="MachineMiddleSection">
+          <div id="MachineStatusMsgWrapper" aria-live="polite">
+            <pre id="MachineStatusMsgText">
+            </pre> <!-- div MachineStatusMsgText !-->
+            <div id="MachineStatusMsgBg"></div>
+          </div>
+
+          <div id="MachineStateContainer" class="MachineStatusContainer" title="This is the Turing machine's current state" aria-live="polite">
+            <div class="BoxTitle">Current state</div>
+            <div id="MachineState" class="MachineStatusBox">
+            </div>
+            <div class="BoxTitle">Current head position</div>
+            <div id="MachineHeadPosition" class="MachineStatusBox">
+            </div>
+          </div>
+        </div>
 
         <button @click="moveTapeRight">Start</button>
     <div class="controls-section">
@@ -423,6 +441,7 @@ export default {
     RenderState()
     {
       $("#MachineState").text( sState );
+      $("#MachineHeadPosition").text( nHeadPosition );
     },
     RenderSteps()
     {
