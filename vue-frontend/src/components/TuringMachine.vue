@@ -1,15 +1,7 @@
 
 <template>
   <div class="main-section">
-    
-        <div id="MachineTapeContainer">
-          <div class="BoxTitle">Tape</div>
-          <div id="MachineTape" class="MachineStatusBox" title="This is the Turing machine's tape. The head position is indicated by the highlighted cell and arrow.">
-           <!-- the following pre elements must be on a single line with no whitespace between them !-->
-           <div id="RunningTapeDisplay" aria-live="polite"><div id="TapeValues"><pre id="LeftTape" class="tape">11011y 10101</pre><div id="ActiveTapeArea"><pre id="ActiveTape" class="tape"> </pre><div id="MachineHead" ref="MachineHead"><div class="HeadTop"></div><div class="HeadBody">Head</div></div></div><pre id="RightTape" class="tape"> </pre></div></div>
-          </div> <!-- div MachineTape !-->
-        </div>
-
+        
         <div id="MachineProgramContainer">
           <div class="BoxTitle">Turing machine program</div>
               <div id="MachineProgramBlock">
@@ -30,15 +22,39 @@
           </div> <!-- div MachineProgramBlock !-->
         </div> <!-- div MachineProgramContainer !--> 
 
+        <div id="MachineTapeContainer">
+          <div class="BoxTitle">Tape</div>
+          <div id="MachineTape" class="MachineStatusBox" title="This is the Turing machine's tape. The head position is indicated by the highlighted cell and arrow.">
+           <!-- the following pre elements must be on a single line with no whitespace between them !-->
+           <div id="RunningTapeDisplay" aria-live="polite"><div id="TapeValues"><pre id="LeftTape" class="tape">11011y 10101</pre><div id="ActiveTapeArea"><pre id="ActiveTape" class="tape"> </pre><div id="MachineHead" ref="MachineHead"><div class="HeadTop"></div><div class="HeadBody">Head</div></div></div><pre id="RightTape" class="tape"> </pre></div></div>
+          </div> <!-- div MachineTape !-->
+        </div>
+
+       
+
         <button @click="moveTapeRight">Start</button>
     <div class="controls-section">
       <div id="MachineControlBlock">
             <div class="BoxTitle">Controls</div>
             <div id="MachineButtonsBlock">
+            <span title="Select the speed of execution for the Turing Machine">
+              <div title="Choose between different Turing machine variants">
+                Select the speed of execution:
+                <select id="MachineSpeed" @change="ChangeExecutionSpeed($event)">
+                  <option value="600" selected="selected">Very slow</option>
+                  <option value="400">Slow</option>
+                  <option value="200">Average</option>
+                  <option value="100">Fast</option>
+                  <option value="50">Very Fast</option>
+
+                </select>
+              </div>
+            </span>
             <button id="RunButton" @click="RunButton" title="Start the machine running">Run</button> <!-- &#x25b8; !--> <!-- Unicode 'play' symbol !-->
             <span title="If enabled, runs as fast as your browser &amp; computer allow">
               <input type="checkbox" id="SpeedCheckbox" @click="SpeedCheckbox">Run at full speed
             </span>
+           
             <br>
             <button id="StopButton" @click="StopButton" disabled="disabled" title="Pause the machine when running">Pause</button><br> <!-- &#x25fe; !-->
             <button id="UndoButton" @click="Undo" title="Undo one machine step" style="float: right;">Undo</button>
@@ -64,6 +80,8 @@
               <div id="MachineVariantDescription" style="font-size: small; font-style: italic;"></div>
               <span style="font-size: x-small;"><a href="javascript:" onclick="$('#AdvancedOptions').hide();">[Close]</a></span>
               </div>
+              
+
             </div> 
             <div id="ResetMessage">Changes will take effect when the machine is reset.</div>
             <br>
@@ -145,6 +163,7 @@ let oRegExp = new RegExp();
 // let oPrevLineMarker = $("<div class='PrevLineMarker'>Prev<div class='PrevLineMarkerEnd'></div></div>");
 // let sPreviousStatusMsg = "";
 let oPrevInstruction = "";
+let gameSpeed = 500;
 
 export default {
   name: 'TuringMachine',
@@ -184,6 +203,10 @@ export default {
         success: () => { this.loadSuccessCallback },
         error: () => { this.loadErrorCallback }
       });
+    },
+    ChangeExecutionSpeed(event){
+      console.log(event);
+      gameSpeed = event;
     },
     loadErrorCallback( oData, sStatus, oRequestObj )
     {
@@ -546,7 +569,7 @@ export default {
     debug ( n, str )
     {
       if( n <= 0 ) {
-        // SetStatusMessage( str, null);
+        this.SetStatusMessage( str, null);
         console.log( str );
       }
       if( nDebugLevel >= n  ) {
@@ -563,7 +586,6 @@ export default {
     },
     OnLoad () 
     {
-        console.log(palindromeProgram);
         if( nDebugLevel > 0 ) $(".DebugClass").toggle( true );
         
         if( typeof( isOldIE ) != "undefined" ) {
@@ -938,7 +960,8 @@ export default {
       } else {
         /* Run a single step every 50ms in slow mode */
           if( this.Step() ) {
-            hRunTimer = window.setTimeout( this.Run, 50 );
+            // hRunTimer = window.setTimeout( this.Run, 50 );
+            hRunTimer = window.setTimeout( this.Run, gameSpeed );
           }
         }
     },
