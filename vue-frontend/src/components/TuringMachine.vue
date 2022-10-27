@@ -40,7 +40,7 @@
             <span title="Select the speed of execution for the Turing Machine">
               <div title="Choose between different Turing machine variants">
                 Select the speed of execution:
-                <select id="MachineSpeed" @change="ChangeExecutionSpeed($event)">
+                <select id="MachineSpeed" @change="ChangeExecutionSpeed($event.target.value)">
                   <option value="600" selected="selected">Very slow</option>
                   <option value="400">Slow</option>
                   <option value="200">Average</option>
@@ -205,7 +205,6 @@ export default {
       });
     },
     ChangeExecutionSpeed(event){
-      console.log(event);
       gameSpeed = event;
     },
     loadErrorCallback( oData, sStatus, oRequestObj )
