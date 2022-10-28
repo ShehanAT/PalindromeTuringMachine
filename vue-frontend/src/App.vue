@@ -3,6 +3,7 @@
     <img alt="Vue logo" src="./assets/logo.png">
     <HelloWorld msg="Welcome to Your Vue.js App"/>
     <TuringMachine />
+    <PixiJs />
   </div>
 </template>
 
@@ -10,12 +11,14 @@
 <script>
 import HelloWorld from './components/HelloWorld.vue'
 import TuringMachine from './components/TuringMachine.vue'
+import PixiJs from './components/PixiJs.vue'
 
 export default {
   name: 'App',
   components: {
     HelloWorld,
-    TuringMachine
+    TuringMachine,
+    PixiJs,
   }
 }
 </script>

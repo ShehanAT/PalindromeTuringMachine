@@ -12,6 +12,7 @@
     "core-js": "^3.6.5",
     "fs": "^0.0.1-security",
     "jquery": "^3.6.1",
+    "pixi.js": "^6.5.8",
     "vue": "^2.6.11"
   },
   "devDependencies": {
