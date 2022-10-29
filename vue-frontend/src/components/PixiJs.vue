@@ -1,56 +1,56 @@
-<template>
-    <div class="hello">
-      <h1>PixiJs</h1>
-    </div>
-  </template>
+<template lang="html">
+  <main>
+    <section class="canvas-section">
+      <pixi-renderer
+        @tick="update"
+        :backgroundColor="color.hex"
+        :height="dimensions.y"
+        :width="dimensions.x"
+      >
+        <pixi-sprite  src="/img/logo.png" :x="dimensions.x / 2" :y="dimensions.y / 2 + 40 * Math.sin(t / 20)" :anchorX="0.5" :anchorY="0.5" />
+      </pixi-renderer>
+    </section>
+
+    <section>
+      <h1 class="title">PIXI Renderer</h1>
+      <div class="field is-horizontal">
+        <div class="field-label is-normal">
+          <label class="label">Size</label>
+        </div>
+        <CoordinateField :coordinate="dimensions" />
+      </div>
+
+      <div class="field is-horizontal">
+        <div class="field-label is-normal">
+          <label class="label">Background</label>
+        </div>
+        <ColorField :color="color" />
+      </div>
+    </section>
+  </main>
+</template>
 
 <script>
+import CoordinateField from './CoordinateField.vue'
+import ColorField from './ColorField.vue'
+
 export default {
-  name: 'PixiJs',
-  props: {
+  components: { CoordinateField, ColorField },
+  data () {
+    return {
+      t: 0,
+      dimensions: { x: 640, y: 480 },
+      color: { r: 0, g: 120, b: 255 }
+    }
+  },
+  methods: {
+    update (dt) {
+      this.t += dt
+    }
   }
 }
-
-import * as PIXI from 'pixi.js';
-// import {  Loader } from 'pixi.js';
-
-// const loader = Loader.shared;
-//or this one
-// const loader = app.loader; 
-
-const app = new PIXI.Application({
-    width: 800, height: 600, backgroundColor: 0x1099bb, resolution: window.devicePixelRatio || 1,
-});
-document.body.appendChild(app.view);
-
-const container = new PIXI.Container();
-
-app.stage.addChild(container);
-
-// Create a new texture
-const texture = PIXI.Texture.from('examples/assets/bunny.png');
-
-// Create a 5x5 grid of bunnies
-for (let i = 0; i < 25; i++) {
-    const bunny = new PIXI.Sprite(texture);
-    bunny.anchor.set(0.5);
-    bunny.x = (i % 5) * 40;
-    bunny.y = Math.floor(i / 5) * 40;
-    container.addChild(bunny);
-}
-
-// Move container to the center
-container.x = app.screen.width / 2;
-container.y = app.screen.height / 2;
-
-// Center bunny sprite in local container coordinates
-container.pivot.x = container.width / 2;
-container.pivot.y = container.height / 2;
-
-// Listen for animate update
-// app.ticker.add((delta) => {
-//     // rotate the container!
-//     // use delta to create frame-independent transform
-//     container.rotation -= 0.01 * delta;
-// });
 </script>
+
+<style scoped>
+.canvas-section { min-height: 544px; }
+</style>
