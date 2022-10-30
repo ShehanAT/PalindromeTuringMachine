@@ -8,6 +8,10 @@ Vue.use(VuePixi)
 
 Vue.config.productionTip = false
 
+const PIXI = require("pixi.js");
+window.PIXI = PIXI;
+
+
 new Vue({
   router,
   render: h => h(App)

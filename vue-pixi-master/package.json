@@ -27,7 +27,8 @@
   "main": "./dist/vue-pixi.common.js",
   "dependencies": {
     "pixi.js": "^4.8.1",
-    "vue": "^2.5.17"
+    "vue": "^2.5.17",
+    "vue-pixi-wrapper": "^2.3.5"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.0.1",

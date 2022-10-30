@@ -9,10 +9,10 @@
         <p class="menu-label">PIXI Elements</p>
         <ul class="menu-list">
          <li><router-link to="/renderer">Renderer</router-link></li>
-           <!--
+           
           <li><router-link to="/container">Container</router-link></li>
           <li><router-link to="/sprite">Sprite</router-link></li>
-          <li><router-link to="/text">Text</router-link></li> -->
+          <li><router-link to="/text">Text</router-link></li>
         </ul>
       </aside>
     </div>

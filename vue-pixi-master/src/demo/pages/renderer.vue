@@ -8,7 +8,7 @@
         :width="dimensions.x"
       >
         <pixi-sprite  src="/img/logo.png" :x="dimensions.x / 2" :y="dimensions.y / 2 + 40 * Math.sin(t / 20)" :anchorX="0.5" :anchorY="0.5" />
-        <pixi-sprite  src="/img/up-arrow-icon.png" :x="dimensions.x / 8" :y="(dimensions.y / 8) + 50" :anchorX="0.5" :anchorY="0.5" :scaleX="0.25" :scaleY="0.25" /> 
+        <pixi-sprite  src="/img/up-arrow-icon.png" :x="dimensions.x / 8" :y="(dimensions.y / 8) + 50" :anchorX="0.5" :anchorY="0.5" :scaleX="0.25" :scaleY="0.25" />
       </pixi-renderer>
     </section>
 
@@ -34,6 +34,9 @@
 <script>
 import CoordinateField from '../components/CoordinateField.vue'
 import ColorField from '../components/ColorField.vue'
+import Sprite from '../../components/Sprite'
+
+const numberTile1 = Sprite.from('/img/square-icon-v2.png')
 
 export default {
   components: { CoordinateField, ColorField },
@@ -48,6 +51,12 @@ export default {
     update (dt) {
       this.t += dt
     }
+  },
+  mounted () {
+    console.log('mounted() executing...')
+    numberTile1.anchor.set(0.5)
+    numberTile1.x = this.dimensions.x / 8
+    numberTile1.y = this.dimensions.y / 8
   }
 }
 </script>

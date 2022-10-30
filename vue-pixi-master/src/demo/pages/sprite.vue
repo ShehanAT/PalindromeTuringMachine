@@ -99,6 +99,7 @@
           </div>
         </div>
       </div>
+
     </section>
   </main>
 </template>
@@ -106,9 +107,17 @@
 <script>
 import CoordinateField from '../components/CoordinateField.vue'
 import ColorField from '../components/ColorField.vue'
+import {
+  PApplication, 
+  PContainer,
+  PSprite,
+} from "vue-pixi-wrapper"
+
 
 export default {
-  components: { CoordinateField, ColorField },
+  components: { CoordinateField, ColorField, PApplication,
+    PContainer,
+    PSprite, },
   data () {
     return {
       t: 0,
@@ -119,7 +128,11 @@ export default {
       pivot: { x: 0, y: 0 },
       skew: { x: 0, y: 0 },
       rotation: 0,
-      alpha: 1
+      alpha: 1,
+      width: 800,
+      height: 600,
+      backgroundColor: 0x000000,
+      resolution: 1
     }
   },
   methods: {
