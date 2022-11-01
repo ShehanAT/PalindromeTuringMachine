@@ -77,7 +77,7 @@ jQuery(document).ready(($) => {
                     html += `<li data-src="${items[j].entry}" data-plugins="${plugins}" data-validVersions="${validVersions}">${items[j].title}</li>`;
                 }
                 html += '</ul>';
-
+                console.log(html);
                 $('.main-menu').append(html);
             }
 
@@ -202,6 +202,10 @@ jQuery(document).ready(($) => {
 
                         bpc.loadPackages();
                     },
+                    error(err){
+                        console.log(`examples/js/${$(this).parent().attr('data-section')}/${$(this).attr('data-src')}`)
+                        console.log(err);
+                    }
                 });
             }
         });
