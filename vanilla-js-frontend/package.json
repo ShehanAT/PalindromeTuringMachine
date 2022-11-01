@@ -4,6 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "js": "terser src/js/pixi-examples.js -c -m -o dest/js/turing-machine-frontend.min.js --source-map",
+    "build": "npm run js",
+    "lint": "eslint {src}/**/*.js --max-warnings 0",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
