@@ -1,3 +1,5 @@
+
+
 const app = new PIXI.Application({ backgroundColor: 0x1099bb });
 document.body.appendChild(app.view);
 
@@ -12,6 +14,19 @@ bunny.x = app.screen.width / 2;
 bunny.y = app.screen.height / 2;
 
 app.stage.addChild(bunny);
+
+// Render number line numbers as PIXI.Text
+const text1 = new Text('1', {
+    fontFamily: 'Arial',
+    fontSize: 24,
+    fill: 0xff1010,
+    align: 'center',
+});
+
+text1.x = app.screen.width / 8;
+text1.y = app.screen.width / 8;
+
+app.stage.addChild(text1)
 
 // Listen for animate update
 app.ticker.add((delta) => {
