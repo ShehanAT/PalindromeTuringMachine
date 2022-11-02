@@ -28,29 +28,19 @@ app.stage.addChild(tape_pointer);
 // text1.x = app.screen.width / 2;
 // text1.y = app.screen.height / 2;
 
-// Create the font
-const style = new PIXI.TextStyle();
-PIXI.BitmapFont.from("foo", style);
+RenderTapeWPixi();
+RenderButtonSection();
+// setTimeout(function (){
+//     console.log("executing RunButton()...");
+//     // RunButton();
+//     var all = document.getElementsByTagName("*");
 
-// Create 8 numbers using PIXI.BitmapText elements 
-for(var i = 0 ; i < 8 ; i++){
-    // Apply the font to our text
-    const text = new PIXI.BitmapText((i + 1).toString(), { fontName: "foo" });
-    style.x = app.screen.width / 2;
-    style.y = app.screen.height / 2;
+//     for (var i=0, max=all.length; i < max; i++) {
+//         // Do something with the element here
+//         console.log(all[i]);
+//     }
+// }, 2000);
 
-    text.x = app.screen.width / 2 + (i * 25);
-    text.y = app.screen.height / 2;
-
-    // Update the font style
-    style.fill = 'black';
-    PIXI.BitmapFont.from("foo", style);
-
-    // Update text
-    text.updateText();
-
-    app.stage.addChild(text)
-}
 
 // Listen for animate update
 app.ticker.add((delta) => {
@@ -683,6 +673,7 @@ function ClearDebug()
 
 function EnableControls( bStep, bRun, bStop, bReset, bSpeed, bTextarea, bUndo )
 {
+  console.log(document.getElementById('StepButton'));
   document.getElementById( 'StepButton' ).disabled = !bStep;
   document.getElementById( 'RunButton' ).disabled = !bRun;
   document.getElementById( 'StopButton' ).disabled = !bStop;
@@ -715,7 +706,7 @@ function RunButton()
 {
 	SetStatusMessage( "Running..." );
 	/* Make sure that the step interval is up-to-date */
-	SpeedCheckbox();
+	// SpeedCheckbox();
 	EnableControls( false, false, true, false, false, false, false );
 	Run();
 }
@@ -1076,4 +1067,56 @@ function debug( n, str )
 
 function renderHeadSymbolWPixi(sHeadSymbol){
     console.log(sHeadSymbol.split(""));   
+  
+}
+
+function RenderTapeWPixi() {
+    const style = new PIXI.TextStyle();
+    PIXI.BitmapFont.from("foo", style);
+
+    for(var i = 0 ; i < 8 ; i++){
+        // Apply the font to our text
+        const text = new PIXI.BitmapText((Math.floor(Math.random() * (10 - 0)) + 0).toString(), { fontName: "foo" });
+        style.x = app.screen.width / 2;
+        style.y = app.screen.height / 2;
+    
+        text.x = app.screen.width / 2 + (i * 25);
+        text.y = app.screen.height / 2;
+    
+        // Update the font style
+        style.fill = 'black';
+        PIXI.BitmapFont.from("foo", style);
+    
+        // Update text
+        text.updateText();
+    
+        app.stage.addChild(text)
+    }
+    setTimeout(function (){
+        app.stage.removeChild(app.stage.getChildAt(2));
+    }, 2000);
+    // console.log(app.stage.getChildAt(2).remove);
+}
+
+function RenderButtonSection() {
+    const runButton = PIXI.Sprite.from('examples/assets/start-icon.png');
+
+    runButton.anchor.set(0.5);
+    runButton.x = 100;
+    runButton.y = 100;
+    runButton.width = 50;
+    runButton.height = 50;
+
+    runButton.on('pointerdown', function(){console.log('clicked start button')});
+    runButton.on('pointerup', onButtonDownPixi);
+    runButton.on('pointerupoutside', onButtonDownPixi);
+    runButton.on('pointerover', onButtonDownPixi);
+    runButton.on('pointerout', onButtonDownPixi);
+
+    app.stage.addChild(runButton);
+
+}
+
+function onButtonDownPixi() {
+    console.log("Start Button Clicked");
 }
