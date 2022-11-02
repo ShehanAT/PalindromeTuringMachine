@@ -168,34 +168,37 @@ jQuery(document).ready(($) => {
             $(this).toggleClass('open');
         });
 
-        $('.main-menu li').on(bpc.clickType, function onClick() {
-            if (!$(this).hasClass('selected')) {
+        $('.main-menu').on('click', function onClick() {
+            // if (!$(this).hasClass('selected')) {
+                console.log('passing body on load...');
                 $('.main-menu li.selected').removeClass('selected');
                 $(this).addClass('selected');
                 // load data
                 bpc.closeMobileNav();
 
-                const page = `/${$(this).parent().attr('data-section')}/${$(this).attr('data-src')}`;
-                bpc.exampleTitle = $(this).text();
+                // const page = `/${$(this).parent().attr('data-section')}/${$(this).attr('data-src')}`;
+                // bpc.exampleTitle = $(this).text();
 
-                window.location.hash = page;
-                document.title = `${bpc.exampleTitle} - PixiJS Examples`;
+                // window.location.hash = page;
+                // document.title = `${bpc.exampleTitle} - PixiJS Examples`;
 
                 // Track page change in analytics
-                ga('set', { page, title: bpc.exampleTitle });
-                ga('send', 'pageview');
+                // ga('set', { page, title: bpc.exampleTitle });
+                // ga('send', 'pageview');
 
-                bpc.exampleUrl = `examples/js/${$(this).parent().attr('data-section')}/${$(this).attr('data-src')}`;
-                bpc.exampleFilename = $(this).attr('data-src');
+                bpc.exampleUrl = `examples/js/sprite/basic.js`;
+                bpc.exampleFilename = 'basic.js';
 
-                const plugins = $(this).attr('data-plugins');
-                bpc.exampleRequiredPlugins = plugins === '' ? [] : plugins.split(',');
+                // const plugins = $(this).attr('data-plugins');
+                // bpc.exampleRequiredPlugins = plugins === '' ? [] : plugins.split(',');
+                bpc.exampleRequiredPlugins = [];
 
-                const validVersions = $(this).attr('data-validVersions');
-                bpc.exampleValidVersions = validVersions === '' ? [6, 5] : validVersions.split(',').map((v) => parseInt(v, 10));
+                // const validVersions = $(this).attr('data-validVersions');
+                // bpc.exampleValidVersions = validVersions === '' ? [6, 5] : validVersions.split(',').map((v) => parseInt(v, 10));
+                bpc.exampleValidVersions = [6, 5];
 
                 $.ajax({
-                    url: `examples/js/${$(this).parent().attr('data-section')}/${$(this).attr('data-src')}`,
+                    url: `examples/js/sprite/basic.js`,
                     dataType: 'text',
                     success(data) {
                         bpc.exampleSourceCode = data;
@@ -203,12 +206,54 @@ jQuery(document).ready(($) => {
                         bpc.loadPackages();
                     },
                     error(err){
-                        console.log(`examples/js/${$(this).parent().attr('data-section')}/${$(this).attr('data-src')}`)
+                        console.log(`examples/js/sprite/basic.js`)
                         console.log(err);
                     }
                 });
-            }
+            // }
         });
+
+        // $('.main-menu li').on(bpc.clickType, function onClick() {
+        //     if (!$(this).hasClass('selected')) {
+        //         $('.main-menu li.selected').removeClass('selected');
+        //         $(this).addClass('selected');
+        //         // load data
+        //         bpc.closeMobileNav();
+
+        //         const page = `/${$(this).parent().attr('data-section')}/${$(this).attr('data-src')}`;
+        //         bpc.exampleTitle = $(this).text();
+
+        //         window.location.hash = page;
+        //         document.title = `${bpc.exampleTitle} - PixiJS Examples`;
+
+        //         // Track page change in analytics
+        //         ga('set', { page, title: bpc.exampleTitle });
+        //         ga('send', 'pageview');
+
+        //         bpc.exampleUrl = `examples/js/${$(this).parent().attr('data-section')}/${$(this).attr('data-src')}`;
+        //         bpc.exampleFilename = $(this).attr('data-src');
+
+        //         const plugins = $(this).attr('data-plugins');
+        //         bpc.exampleRequiredPlugins = plugins === '' ? [] : plugins.split(',');
+
+        //         const validVersions = $(this).attr('data-validVersions');
+        //         bpc.exampleValidVersions = validVersions === '' ? [6, 5] : validVersions.split(',').map((v) => parseInt(v, 10));
+
+        //         $.ajax({
+        //             url: `examples/js/${$(this).parent().attr('data-section')}/${$(this).attr('data-src')}`,
+        //             dataType: 'text',
+        //             success(data) {
+        //                 bpc.exampleSourceCode = data;
+
+        //                 bpc.loadPackages();
+        //             },
+        //             error(err){
+        //                 console.log(`examples/js/${$(this).parent().attr('data-section')}/${$(this).attr('data-src')}`)
+        //                 console.log(err);
+        //             }
+        //         });
+        //     }
+        // });
 
         bpc.loadPackages = function loadPackages() {
             $.getJSON('examples/packages.json', (data) => {
