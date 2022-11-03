@@ -1107,16 +1107,36 @@ function RenderButtonSection() {
     runButton.width = 50;
     runButton.height = 50;
 
-    runButton.on('pointerdown', function(){console.log('clicked start button')});
-    runButton.on('pointerup', onButtonDownPixi);
-    runButton.on('pointerupoutside', onButtonDownPixi);
-    runButton.on('pointerover', onButtonDownPixi);
-    runButton.on('pointerout', onButtonDownPixi);
+	// make the sprite interactive
+	runButton.interactive = true;
+	runButton.buttonMode = true;
+
+    runButton.on('pointertap', startButtonClicked);
 
     app.stage.addChild(runButton);
 
+	const stopButton = PIXI.Sprite.from('examples/assets/stop-icon.jpg');
+
+    stopButton.anchor.set(0.5);
+    stopButton.x = 100;
+    stopButton.y = 160;
+    stopButton.width = 50;
+    stopButton.height = 50;
+
+	// make the sprite interactive
+	stopButton.interactive = true;
+	stopButton.buttonMode = true;
+
+    stopButton.on('pointertap', stopButtonClicked);
+
+    app.stage.addChild(stopButton);
+
 }
 
-function onButtonDownPixi() {
-    console.log("Start Button Clicked");
+function startButtonClicked(){
+	console.log('startButton clicked');
+}
+
+function stopButtonClicked(){
+	console.log('stopButton clicked');
 }
