@@ -1,5 +1,10 @@
 
-
+let buttonsArray = [];
+var runButton = null;
+var runButtonIndex = null;
+var stopButton = null;
+var stopButtonIndex = null;
+var visible = false;
 const app = new PIXI.Application({ backgroundColor: 0x1099bb });
 document.body.appendChild(app.view);
 
@@ -27,9 +32,28 @@ app.stage.addChild(tape_pointer);
 
 // text1.x = app.screen.width / 2;
 // text1.y = app.screen.height / 2;
-
-RenderTapeWPixi();
 RenderButtonSection();
+RenderTapeWPixi();
+setInterval(function() {
+	// runButton.visible = false;
+	// stopButton.visible = false;
+	console.log(runButtonIndex);
+	console.log(stopButtonIndex);
+	changeButtons();
+
+	// app.stage.removeChild(runButton);
+	// app.stage.removeChild(stopButton);
+	// app.stage.removeChild(buttonsArray[0]);
+	// app.stage.removeChild(buttonsArray[1]);
+	// console.log('removing buttons...');
+}, 1000);
+
+function changeButtons(){
+	buttonsArray[runButtonIndex].visible = visible;
+	buttonsArray[stopButtonIndex].visible = visible;
+	visible = !visible;
+}
+
 // setTimeout(function (){
 //     console.log("executing RunButton()...");
 //     // RunButton();
@@ -96,6 +120,9 @@ var oPrevLineMarker = $("<div class='PrevLineMarker'>Prev<div class='PrevLineMar
 var oPrevInstruction = null;
 
 var sPreviousStatusMsg = "";  /* Most recent status message, for flashing alerts */
+
+
+
 
 
 /* Step(): run the Turing machine for one step. Returns false if the machine is in halt state at the end of the step, true otherwise. */
@@ -673,13 +700,16 @@ function ClearDebug()
 
 function EnableControls( bStep, bRun, bStop, bReset, bSpeed, bTextarea, bUndo )
 {
-  console.log(document.getElementById('StepButton'));
-  document.getElementById( 'StepButton' ).disabled = !bStep;
-  document.getElementById( 'RunButton' ).disabled = !bRun;
-  document.getElementById( 'StopButton' ).disabled = !bStop;
-  document.getElementById( 'ResetButton' ).disabled = !bReset;
-  document.getElementById( 'SpeedCheckbox' ).disabled = !bSpeed;
-  document.getElementById( 'Source' ).disabled = !bTextarea;
+  console.log(app.stage.getChildAt(1));
+  console.log(app.stage.getChildAt(2));
+//   document.getElementById( 'StepButton' ).disabled = !bStep;
+//   document.getElementById( 'RunButton' ).disabled = !bRun;
+//   document.getElementById( 'StopButton' ).disabled = !bStop;
+//   document.getElementById( 'ResetButton' ).disabled = !bReset;
+//   document.getElementById( 'SpeedCheckbox' ).disabled = !bSpeed;
+//   document.getElementById( 'Source' ).disabled = !bTextarea;
+	// app.stage.getChildAt
+
   EnableUndoButton(bUndo);
   if( bSpeed ) {
     $( "#SpeedCheckboxLabel" ).removeClass( "disabled" );
@@ -1092,14 +1122,12 @@ function RenderTapeWPixi() {
     
         app.stage.addChild(text)
     }
-    setTimeout(function (){
-        app.stage.removeChild(app.stage.getChildAt(2));
-    }, 2000);
+
     // console.log(app.stage.getChildAt(2).remove);
 }
 
 function RenderButtonSection() {
-    const runButton = PIXI.Sprite.from('examples/assets/start-icon.png');
+    runButton = PIXI.Sprite.from('examples/assets/start-icon.png');
 
     runButton.anchor.set(0.5);
     runButton.x = 100;
@@ -1113,9 +1141,11 @@ function RenderButtonSection() {
 
     runButton.on('pointertap', startButtonClicked);
 
+	buttonsArray.push(runButton);
     app.stage.addChild(runButton);
+	runButtonIndex = app.stage.children.length - 2;
 
-	const stopButton = PIXI.Sprite.from('examples/assets/stop-icon.jpg');
+	stopButton = PIXI.Sprite.from('examples/assets/stop-icon.jpg');
 
     stopButton.anchor.set(0.5);
     stopButton.x = 100;
@@ -1128,13 +1158,15 @@ function RenderButtonSection() {
 	stopButton.buttonMode = true;
 
     stopButton.on('pointertap', stopButtonClicked);
-
+	buttonsArray.push(stopButton);
     app.stage.addChild(stopButton);
+	stopButtonIndex = app.stage.children.length - 2;
 
 }
 
 function startButtonClicked(){
 	console.log('startButton clicked');
+	RunButton();
 }
 
 function stopButtonClicked(){
