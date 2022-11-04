@@ -5,6 +5,8 @@ var runButtonIndex = null;
 var stopButton = null;
 var stopButtonIndex = null;
 var visible = false;
+var currentHeadIndex = null;
+
 const app = new PIXI.Application({ backgroundColor: 0x1099bb });
 document.body.appendChild(app.view);
 
@@ -34,36 +36,13 @@ app.stage.addChild(tape_pointer);
 // text1.y = app.screen.height / 2;
 RenderButtonSection();
 RenderTapeWPixi();
-setInterval(function() {
-	// runButton.visible = false;
-	// stopButton.visible = false;
-	console.log(runButtonIndex);
-	console.log(stopButtonIndex);
-	changeButtons();
 
-	// app.stage.removeChild(runButton);
-	// app.stage.removeChild(stopButton);
-	// app.stage.removeChild(buttonsArray[0]);
-	// app.stage.removeChild(buttonsArray[1]);
-	// console.log('removing buttons...');
-}, 1000);
 
 function changeButtons(){
 	buttonsArray[runButtonIndex].visible = visible;
 	buttonsArray[stopButtonIndex].visible = visible;
 	visible = !visible;
 }
-
-// setTimeout(function (){
-//     console.log("executing RunButton()...");
-//     // RunButton();
-//     var all = document.getElementsByTagName("*");
-
-//     for (var i=0, max=all.length; i < max; i++) {
-//         // Do something with the element here
-//         console.log(all[i]);
-//     }
-// }, 2000);
 
 
 // Listen for animate update
@@ -700,22 +679,21 @@ function ClearDebug()
 
 function EnableControls( bStep, bRun, bStop, bReset, bSpeed, bTextarea, bUndo )
 {
-  console.log(app.stage.getChildAt(1));
-  console.log(app.stage.getChildAt(2));
+
 //   document.getElementById( 'StepButton' ).disabled = !bStep;
 //   document.getElementById( 'RunButton' ).disabled = !bRun;
 //   document.getElementById( 'StopButton' ).disabled = !bStop;
 //   document.getElementById( 'ResetButton' ).disabled = !bReset;
 //   document.getElementById( 'SpeedCheckbox' ).disabled = !bSpeed;
 //   document.getElementById( 'Source' ).disabled = !bTextarea;
-	// app.stage.getChildAt
 
-  EnableUndoButton(bUndo);
-  if( bSpeed ) {
-    $( "#SpeedCheckboxLabel" ).removeClass( "disabled" );
-  } else {
-    $( "#SpeedCheckboxLabel" ).addClass( "disabled" );
-  }
+
+//   EnableUndoButton(bUndo);
+//   if( bSpeed ) {
+//     $( "#SpeedCheckboxLabel" ).removeClass( "disabled" );
+//   } else {
+//     $( "#SpeedCheckboxLabel" ).addClass( "disabled" );
+//   }
 }
 
 function EnableUndoButton(bUndo)
@@ -729,7 +707,7 @@ function StepButton()
 {
 	SetStatusMessage( "", -1 );
 	Step();
-	EnableUndoButton(true);
+	// EnableUndoButton(true);
 }
 
 function RunButton()
