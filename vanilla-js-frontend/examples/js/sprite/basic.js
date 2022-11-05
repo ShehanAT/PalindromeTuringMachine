@@ -1,12 +1,13 @@
 
 let buttonsArray = [];
+let tapeNumArray = [];
 var runButton = null;
 var runButtonIndex = null;
 var stopButton = null;
 var stopButtonIndex = null;
 var visible = false;
 var currentHeadIndex = null;
-
+var tapeNumIndex = null;
 const app = new PIXI.Application({ backgroundColor: 0x1099bb });
 document.body.appendChild(app.view);
 
@@ -304,6 +305,8 @@ function isArray( possiblyArr )
 /* Compile(): parse the inputted program and store it in aProgram */
 function Compile()
 {
+	var sourceNum = app.stage.getChildAt(tapeNumIndex)
+	console.log(tapeNumIndex);
 	var sSource = oTextarea.value;
 	debug( 2, "Compile()" );
 	
@@ -1099,6 +1102,8 @@ function RenderTapeWPixi() {
         text.updateText();
     
         app.stage.addChild(text)
+		var tapeNumIndex = app.stage.children.length - 2;
+		tapeNumArray.push(tapeNumIndex);
     }
 
     // console.log(app.stage.getChildAt(2).remove);
