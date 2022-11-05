@@ -1,3 +1,44 @@
+var palindromeProgram = `; This example program checks if the input string is a binary palindrome.
+; Input: a string of 0's and 1's, eg '1001001'
+
+
+; Machine starts in state 0.
+
+; State 0: read the leftmost symbol
+0 0 _ r 1o
+0 1 _ r 1i
+0 _ _ * accept     ; Empty input
+
+; State 1o, 1i: find the rightmost symbol
+1o _ _ l 2o
+1o * * r 1o
+
+1i _ _ l 2i
+1i * * r 1i
+
+; State 2o, 2i: check if the rightmost symbol matches the most recently read left-hand symbol
+2o 0 _ l 3
+2o _ _ * accept
+2o * * * reject
+
+2i 1 _ l 3
+2i _ _ * accept
+2i * * * reject
+
+; State 3, 4: return to left end of remaining input
+3 _ _ * accept
+3 * * l 4
+4 * * l 4
+4 _ _ r 0  ; Back to the beginning
+
+accept * : r accept2
+accept2 * ) * halt-accept
+
+reject _ : r reject2
+reject * _ l reject
+reject2 * ( * halt-reject
+
+;$INITIAL_TAPE:1001001`;
 
 let buttonsArray = [];
 let tapeNumArray = [];
@@ -8,6 +49,18 @@ var stopButtonIndex = null;
 var visible = false;
 var currentHeadIndex = null;
 var tapeNumIndex = null;
+const style = new PIXI.TextStyle();
+PIXI.BitmapFont.from("foo", style);
+var firstTapeSquare = new PIXI.BitmapText((Math.floor(Math.random() * (10 - 0)) + 0).toString(), { fontName: "foo" });
+var secondTapeSquare = new PIXI.BitmapText((Math.floor(Math.random() * (10 - 0)) + 0).toString(), { fontName: "foo" });
+var thirdTapeSquare = new PIXI.BitmapText((Math.floor(Math.random() * (10 - 0)) + 0).toString(), { fontName: "foo" });
+var fourthTapeSquare = new PIXI.BitmapText((Math.floor(Math.random() * (10 - 0)) + 0).toString(), { fontName: "foo" });
+var fifthTapeSquare = new PIXI.BitmapText((Math.floor(Math.random() * (10 - 0)) + 0).toString(), { fontName: "foo" });
+var sixthTapeSquare = new PIXI.BitmapText((Math.floor(Math.random() * (10 - 0)) + 0).toString(), { fontName: "foo" });
+var seventhTapeSquare = new PIXI.BitmapText((Math.floor(Math.random() * (10 - 0)) + 0).toString(), { fontName: "foo" });
+
+var tapeSquaresArr = [firstTapeSquare, secondTapeSquare, thirdTapeSquare, fourthTapeSquare, fifthTapeSquare, sixthTapeSquare, seventhTapeSquare];
+
 const app = new PIXI.Application({ backgroundColor: 0x1099bb });
 document.body.appendChild(app.view);
 
@@ -47,13 +100,13 @@ function changeButtons(){
 
 
 // Listen for animate update
-app.ticker.add((delta) => {
-    // just for fun, let's rotate mr rabbit a little
-    // delta is 1 if running at 100% performance
-    // creates frame-independent transformation
-    // tape_pointer.rotation += 0.1 * delta;
-    tape_pointer.x += 0.1
-});
+// app.ticker.add((delta) => {
+//     // just for fun, let's rotate mr rabbit a little
+//     // delta is 1 if running at 100% performance
+//     // creates frame-independent transformation
+//     // tape_pointer.rotation += 0.1 * delta;
+//     tape_pointer.x += 0.1
+// });
 
 // RunButton();
 /* JavaScript Turing machine emulator
@@ -305,9 +358,9 @@ function isArray( possiblyArr )
 /* Compile(): parse the inputted program and store it in aProgram */
 function Compile()
 {
-	var sourceNum = app.stage.getChildAt(tapeNumIndex)
-	console.log(tapeNumIndex);
-	var sSource = oTextarea.value;
+	var sSource = palindromeProgram;
+	// console.log(tapeNumIndex);
+	// var sSource = oTextarea.value;
 	debug( 2, "Compile()" );
 	
 	/* Clear syntax error messages */
@@ -642,11 +695,12 @@ function RenderTape()
 //	debug( 4, "RenderTape(): LeftTape = '" + $("#LeftTape").text() + "' ActiveTape = '" + $("#ActiveTape").text() + "' RightTape = '" + $("#RightTape").text() + "'" );
 	
 	/* Scroll tape display to make sure that head is visible */
-	if( $("#ActiveTapeArea").position().left < 0 ) {
-		$("#MachineTape").scrollLeft( $("#MachineTape").scrollLeft() + $("#ActiveTapeArea").position().left - 10 );
-	} else if( $("#ActiveTapeArea").position().left + $("#ActiveTapeArea").width() > $("#MachineTape").width() ) {
-		$("#MachineTape").scrollLeft( $("#MachineTape").scrollLeft() + ($("#ActiveTapeArea").position().left - $("#MachineTape").width()) + 10 );
-	}
+	// if( $("#ActiveTapeArea").position().left < 0 ) {
+	// 	$("#MachineTape").scrollLeft( $("#MachineTape").scrollLeft() + $("#ActiveTapeArea").position().left - 10 );
+	// } else if( $("#ActiveTapeArea").position().left + $("#ActiveTapeArea").width() > $("#MachineTape").width() ) {
+	// 	$("#MachineTape").scrollLeft( $("#MachineTape").scrollLeft() + ($("#ActiveTapeArea").position().left - $("#MachineTape").width()) + 10 );
+	// }
+	tape_pointer.x += 25
 }
 
 function RenderState()
@@ -1083,27 +1137,25 @@ function renderHeadSymbolWPixi(sHeadSymbol){
 
 function RenderTapeWPixi() {
     const style = new PIXI.TextStyle();
-    PIXI.BitmapFont.from("foo", style);
+    // PIXI.BitmapFont.from("foo", style);
 
-    for(var i = 0 ; i < 8 ; i++){
+    for(var i = 0 ; i < 7 ; i++){
         // Apply the font to our text
-        const text = new PIXI.BitmapText((Math.floor(Math.random() * (10 - 0)) + 0).toString(), { fontName: "foo" });
+        tapeSquaresArr[i]
         style.x = app.screen.width / 2;
         style.y = app.screen.height / 2;
     
-        text.x = app.screen.width / 2 + (i * 25);
-        text.y = app.screen.height / 2;
+        tapeSquaresArr[i].x = app.screen.width / 2 + (i * 25);
+        tapeSquaresArr[i].y = app.screen.height / 2;
     
         // Update the font style
         style.fill = 'black';
-        PIXI.BitmapFont.from("foo", style);
+        // PIXI.BitmapFont.from("foo", style);
     
         // Update text
-        text.updateText();
-    
-        app.stage.addChild(text)
-		var tapeNumIndex = app.stage.children.length - 2;
-		tapeNumArray.push(tapeNumIndex);
+        tapeSquaresArr[i].updateText();
+		
+        app.stage.addChild(tapeSquaresArr[i])
     }
 
     // console.log(app.stage.getChildAt(2).remove);
