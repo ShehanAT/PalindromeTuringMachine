@@ -48,6 +48,9 @@ var stopButton = null;
 var stopButtonIndex = null;
 var visible = false;
 var currentHeadIndex = null;
+var currentStateVal = null;
+var nextHeadIndex = null;
+var nextStateVal = null;
 var tapeNumIndex = null;
 const style = new PIXI.TextStyle();
 PIXI.BitmapFont.from("foo", style);
@@ -58,7 +61,7 @@ var fourthTapeSquare = new PIXI.BitmapText((Math.floor(Math.random() * (10 - 0))
 var fifthTapeSquare = new PIXI.BitmapText((Math.floor(Math.random() * (10 - 0)) + 0).toString(), { fontName: "foo" });
 var sixthTapeSquare = new PIXI.BitmapText((Math.floor(Math.random() * (10 - 0)) + 0).toString(), { fontName: "foo" });
 var seventhTapeSquare = new PIXI.BitmapText((Math.floor(Math.random() * (10 - 0)) + 0).toString(), { fontName: "foo" });
-
+var stateValText = new PIXI.BitmapText("Current State Value: NA", { fontName: "foo" });
 var tapeSquaresArr = [firstTapeSquare, secondTapeSquare, thirdTapeSquare, fourthTapeSquare, fifthTapeSquare, sixthTapeSquare, seventhTapeSquare];
 
 const app = new PIXI.Application({ backgroundColor: 0x1099bb });
@@ -78,17 +81,6 @@ tape_pointer.height = 30;
 
 app.stage.addChild(tape_pointer);
 
-// // Render number line numbers as PIXI.Text
-// const text1 = new Text('1', {
-//     fontFamily: 'Arial',
-//     fontSize: 24,
-//     fill: 0xff1010,
-//     align: 'center',
-// });
-
-// text1.x = app.screen.width / 2;
-// text1.y = app.screen.height / 2;
-RenderButtonSection();
 RenderTapeWPixi();
 
 
@@ -155,11 +147,29 @@ var oPrevInstruction = null;
 var sPreviousStatusMsg = "";  /* Most recent status message, for flashing alerts */
 
 
+function LoadMachinePixiJs() {
+	Compile();
+	UpdatePixiJsInterface();
+}
+
+function UpdatePixiJsInterface() {
+	RenderPixiJsTape();
+	RenderPixiJsState();
+	RenderPixiJsSteps();
+	// RenderPixiJsLineMarkers();
+}
 
 
+function RenderPixiJsTape() {
+	tapeSquaresArr[nextHeadIndex].text = nextStateVal;
+}
+
+function RenderPixiJsState() {
+	stateValText.text = "Current State Value: " + currentStateVal;
+}
 
 /* Step(): run the Turing machine for one step. Returns false if the machine is in halt state at the end of the step, true otherwise. */
-function Step()
+function Step() // Do not reuse, modified for PixiJs
 {
 	if( bIsDirty) Compile();
 	
@@ -178,7 +188,7 @@ function Step()
 	
 	/* Find appropriate TM instruction */
 	var aInstructions = GetNextInstructions( sState, sHeadSymbol );
-	var oInstruction;
+	var oInstruction;i
 	if( aInstructions.length == 0 ) {
     // No matching instruction found. Error handled below.
     oInstruction = null;
@@ -356,7 +366,7 @@ function isArray( possiblyArr )
 }
 
 /* Compile(): parse the inputted program and store it in aProgram */
-function Compile()
+function Compile() // Reuse method for PixiJs program
 {
 	var sSource = palindromeProgram;
 	// console.log(tapeNumIndex);
@@ -422,7 +432,7 @@ function Compile()
 	UpdateInterface();
 }
 
-function ParseLine( sLine, nLineNum )
+function ParseLine( sLine, nLineNum ) // Reuse method for PixiJs program
 {
 	/* discard anything following ';' */
 	debug( 5, "ParseLine( " + sLine + " )" );
@@ -534,7 +544,7 @@ function GetNextInstructions( sState, sHeadSymbol )
 }
 
 /* GetTapeSymbol( n ): returns the symbol at cell n of the TM tape */
-function GetTapeSymbol( n )
+function GetTapeSymbol( n ) // undecided on whether to use for PixiJs program
 {
 	if( n < nTapeOffset || n >= sTape.length + nTapeOffset ) {
 		debug( 4, "GetTapeSymbol( " + n + " ) = '" + c + "'   outside sTape range" );
@@ -700,7 +710,7 @@ function RenderTape()
 	// } else if( $("#ActiveTapeArea").position().left + $("#ActiveTapeArea").width() > $("#MachineTape").width() ) {
 	// 	$("#MachineTape").scrollLeft( $("#MachineTape").scrollLeft() + ($("#ActiveTapeArea").position().left - $("#MachineTape").width()) + 10 );
 	// }
-	tape_pointer.x += 25
+	// tape_pointer.x += 25
 }
 
 function RenderState()
