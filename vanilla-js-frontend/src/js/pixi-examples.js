@@ -185,8 +185,8 @@ jQuery(document).ready(($) => {
                 // ga('set', { page, title: bpc.exampleTitle });
                 // ga('send', 'pageview');
 
-                bpc.exampleUrl = `examples/js/sprite/basic.js`;
-                bpc.exampleFilename = 'basic.js';
+                bpc.exampleUrl = `examples/js/sprite/test-pixi.js`;
+                bpc.exampleFilename = 'test-pixi.js';
 
                 // const plugins = $(this).attr('data-plugins');
                 // bpc.exampleRequiredPlugins = plugins === '' ? [] : plugins.split(',');
@@ -197,7 +197,7 @@ jQuery(document).ready(($) => {
                 bpc.exampleValidVersions = [6, 5];
 
                 $.ajax({
-                    url: `examples/js/sprite/basic.js`,
+                    url: `examples/js/sprite/test-pixi.js`,
                     dataType: 'text',
                     success(data) {
                         bpc.exampleSourceCode = data;
@@ -205,7 +205,7 @@ jQuery(document).ready(($) => {
                         bpc.loadPackages();
                     },
                     error(err){
-                        console.log(`examples/js/sprite/basic.js`)
+                        console.log(`examples/js/sprite/test-pixi.js`)
                         console.log(err);
                     }
                 });
