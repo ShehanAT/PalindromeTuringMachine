@@ -7,18 +7,34 @@ var hardCodedState = [
     ['0', '_', '_', '*', 'accept'],
     ['0', '1', '_', 'r', '1o'],
     ['1i', '_', '_', 'l', '2i'],
+    ['1i', '*', '*', 'r', '1i'],
+    ['1o', '_', '_', 'l', '2o'],
+    ['1o', '*', '*', 'r', '1o'],
     ['2o', '0', '_', 'l', '3'],
-    ['2o', '1', '_', 'l', '3'],
+    ['2o', '_', '_', '*', 'accept'],
+    ['2o', '*', '*', '*', 'reject'],
+    ['2i', '1', '_', 'l', '3'],
+    ['2i', '*', '*', '*', 'reject'],
+    ['3', '_', '_', '*', 'accept'],
+    ['3', '*', '*', 'l', '4'],
+    ['4', '*', '*', 'l', '4'],
+    ['4', '_', '_', 'r', '0'],
+    ['accept', '*', ':', 'r', 'accept2'],
+    ['accept2', '*', ')', '*', 'halt-accept'],
+    ['reject', '_', ':', 'r', 'reject2'],
+    ['reject', '*', '_', 'l', 'reject'],
+    ['reject2', '*', ')', '*', 'halt-reject'],
 ];
 var currentHeadIndex = 0;
-var firstTapeSquare = new PIXI.BitmapText((Math.floor(Math.random() * (2 - 0)) + 0).toString(), { fontName: "foo" });
-var secondTapeSquare = new PIXI.BitmapText((Math.floor(Math.random() * (2 - 0)) + 0).toString(), { fontName: "foo" });
-var thirdTapeSquare = new PIXI.BitmapText((Math.floor(Math.random() * (2 - 0)) + 0).toString(), { fontName: "foo" });
-var fourthTapeSquare = new PIXI.BitmapText((Math.floor(Math.random() * (2 - 0)) + 0).toString(), { fontName: "foo" });
-var fifthTapeSquare = new PIXI.BitmapText((Math.floor(Math.random() * (2 - 0)) + 0).toString(), { fontName: "foo" });
-var sixthTapeSquare = new PIXI.BitmapText((Math.floor(Math.random() * (2 - 0)) + 0).toString(), { fontName: "foo" });
-var seventhTapeSquare = new PIXI.BitmapText("L", { fontName: "foo" });
+var firstTapeSquare = new PIXI.BitmapText("1", { fontName: "foo" });
+var secondTapeSquare = new PIXI.BitmapText("0", { fontName: "foo" });
+var thirdTapeSquare = new PIXI.BitmapText("0", { fontName: "foo" });
+var fourthTapeSquare = new PIXI.BitmapText("1", { fontName: "foo" });
+var fifthTapeSquare = new PIXI.BitmapText("0".toString(), { fontName: "foo" });
+var sixthTapeSquare = new PIXI.BitmapText("0", { fontName: "foo" });
+var seventhTapeSquare = new PIXI.BitmapText("1", { fontName: "foo" });
 var stateValText = new PIXI.BitmapText("Current State Value: NA", { fontName: "foo" });
+var currentState = '0';
 var tapeSquaresArr = [firstTapeSquare, secondTapeSquare, thirdTapeSquare, fourthTapeSquare, fifthTapeSquare, sixthTapeSquare, seventhTapeSquare];
 
 
@@ -78,6 +94,7 @@ function RenderTapeWPixi() {
 
 
 function StartTape(){
+    var counter = 0;
     var moveTape = setInterval(() => {
         
         // if(tapeSquaresArr[currentHeadIndex].text == "L"){
@@ -87,15 +104,33 @@ function StartTape(){
         
         if (currentHeadIndex == (tapeSquaresArr.length - 1)){
             clearInterval(moveTape);
-        }else{
+        }else if(counter < 2){
             var moveTapeDirection = ProcessInput();
-            if(moveTapeDirection == "r"){
-                tape_pointer.x += 25;
-            }else if(moveTapeDirection == "l"){
-                tape_pointer.x -= 25;
+            console.log("moveTapeDirection: " + moveTapeDirection);
+            switch(moveTapeDirection){
+                case "r":
+                    tape_pointer.x += 25;
+                    break;
+                case "l":
+                    tape_pointer.x -= 25;
+                    break;
+                case "halt-reject":
+                    console.log("halt-reject");
+                    clearInterval(moveTape);
+                    break;
+                default:
+                    break;
             }
+            // if(moveTapeDirection == "r"){
+            //     tape_pointer.x += 25;
+            // }else if(moveTapeDirection == "l"){
+            //     tape_pointer.x -= 25;
+            // }
             currentHeadIndex++;
+        }else{
+            clearInterval(moveTape);
         }
+        counter++;
     
     }, 1000);
 
@@ -115,14 +150,25 @@ function MoveTapeInReverse() {
 
 function ProcessInput() {
     var i = 0;
+    var foundMatch = false;
     for ( i = 0 ; i < hardCodedState.length ; i++){
-        if(tapeSquaresArr[currentHeadIndex].text == hardCodedState[i][1] && stateValText.text == hardCodedState[i][0]){
-            tapeSquaresArr[currentHeadIndex].text = '_';
+        console.log("hardCodedState[i][1]: " + hardCodedState[i][1]);
+        console.log("tapeSquaresArr[currentHeadIndex].text: " + tapeSquaresArr[currentHeadIndex].text);
+        console.log("hardCodedState[i][0]: " + hardCodedState[i][0]);
+        console.log("currentState: " + currentState);
+        if(tapeSquaresArr[currentHeadIndex].text == hardCodedState[i][1] && currentState == hardCodedState[i][0]){
+     
+          
+            tapeSquaresArr[currentHeadIndex].text = hardCodedState[i][2];
+            currentState = hardCodedState[i][4];
             stateValText.text = hardCodedState[i][4];
+            foundMatch = true;
             break;
         }
     }
-    console.log("i" + i);
-    console.log(hardCodedState);
-    return hardCodedState[i - 1][3];
+    if(foundMatch){
+        return hardCodedState[i - 1][3];
+    }else{
+        return "halt-reject";
+    }
 }
