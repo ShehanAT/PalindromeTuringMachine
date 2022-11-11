@@ -97,15 +97,10 @@ function RenderTapeWPixi() {
 function StartTape(){
     var counter = 0;
     var moveTape = setInterval(() => {
-        
-        // if(tapeSquaresArr[currentHeadIndex].text == "L"){
-        //     clearInterval(moveTape);
-        //     MoveTapeInReverse();
-        // }
-        
         if (currentHeadIndex == (tapeSquaresArr.length - 1)){
             clearInterval(moveTape);
-        }else if(counter < 2){
+        }
+        else{
             var moveTapeDirection = ProcessInput();
             console.log("moveTapeDirection: " + moveTapeDirection);
             switch(moveTapeDirection){
@@ -122,14 +117,7 @@ function StartTape(){
                 default:
                     break;
             }
-            // if(moveTapeDirection == "r"){
-            //     tape_pointer.x += 25;
-            // }else if(moveTapeDirection == "l"){
-            //     tape_pointer.x -= 25;
-            // }
             currentHeadIndex++;
-        }else{
-            clearInterval(moveTape);
         }
         counter++;
     
