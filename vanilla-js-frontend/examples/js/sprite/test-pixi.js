@@ -8,8 +8,8 @@ var hardCodedState = [
     ['0', '1', '_', 'r', '1o'],
     ['1i', '_', '_', 'l', '2i'],
     ['1i', '*', '*', 'r', '1i'],
-    ['1o', '_', '_', 'l', '2o'],
     ['1o', '*', '*', 'r', '1o'],
+    ['1o', '_', '_', 'l', '2o'],
     ['2o', '0', '_', 'l', '3'],
     ['2o', '_', '_', '*', 'accept'],
     ['2o', '*', '*', '*', 'reject'],
@@ -36,7 +36,8 @@ var seventhTapeSquare = new PIXI.BitmapText("1", { fontName: "foo" });
 var stateValText = new PIXI.BitmapText("Current State Value: NA", { fontName: "foo" });
 var currentState = '0';
 var tapeSquaresArr = [firstTapeSquare, secondTapeSquare, thirdTapeSquare, fourthTapeSquare, fifthTapeSquare, sixthTapeSquare, seventhTapeSquare];
-
+var nextSymbol = '0';
+var prevSymbol = '0';
 
 
 
@@ -132,7 +133,7 @@ function StartTape(){
         }
         counter++;
     
-    }, 1000);
+    }, 2000);
 
 }
 
@@ -152,14 +153,16 @@ function ProcessInput() {
     var i = 0;
     var foundMatch = false;
     for ( i = 0 ; i < hardCodedState.length ; i++){
-        console.log("hardCodedState[i][1]: " + hardCodedState[i][1]);
-        console.log("tapeSquaresArr[currentHeadIndex].text: " + tapeSquaresArr[currentHeadIndex].text);
-        console.log("hardCodedState[i][0]: " + hardCodedState[i][0]);
-        console.log("currentState: " + currentState);
-        if(tapeSquaresArr[currentHeadIndex].text == hardCodedState[i][1] && currentState == hardCodedState[i][0]){
-     
-          
-            tapeSquaresArr[currentHeadIndex].text = hardCodedState[i][2];
+        // console.log("hardCodedState[i][1]: " + hardCodedState[i][1]);
+        
+        // console.log("hardCodedState[i][0]: " + hardCodedState[i][0]);
+        
+        console.log("i: " + i);
+        if(compareTapeValues(tapeSquaresArr[currentHeadIndex].text, hardCodedState[i][1]) && currentState == hardCodedState[i][0]){
+            // setNewSymbolOnTape(tapeSquaresArr[currentHeadIndex].text, hardCodedState[i][2]);
+            var newTapeSymbol = setNewTapeSymbol(tapeSquaresArr[currentHeadIndex].text, hardCodedState[i][2]);
+            console.log(newTapeSymbol);
+            tapeSquaresArr[currentHeadIndex].text = newTapeSymbol;
             currentState = hardCodedState[i][4];
             stateValText.text = hardCodedState[i][4];
             foundMatch = true;
@@ -167,8 +170,37 @@ function ProcessInput() {
         }
     }
     if(foundMatch){
+        console.log("found match: true");
+        console.log("currentState: " + currentState);
+        console.log("tapeSquaresArr[currentHeadIndex].text: " + tapeSquaresArr[currentHeadIndex].text);
+        console.log("new direction: " + hardCodedState[i - 1][3]);
         return hardCodedState[i - 1][3];
     }else{
+        console.log("found match: false");
+        console.log("currentState: " + currentState);
+        console.log("tapeSquaresArr[currentHeadIndex].text: " + tapeSquaresArr[currentHeadIndex].text);
         return "halt-reject";
+    }
+}
+
+function compareTapeValues(currentHeadVal, stateCurrentSymbolVal){
+    if(currentHeadVal == stateCurrentSymbolVal){
+        return true;
+    }else if(stateCurrentSymbolVal == "*"){
+        return true;
+    }else{
+        return false;
+    }
+}
+
+function setNewSymbolOnTape(currentTapeSquare, newSymbol){
+    currentTapeSquare.text = newSymbol;
+}
+
+function setNewTapeSymbol(currentSymbol, newSymbol){
+    if(newSymbol == "*"){
+        return currentSymbol;
+    }else{
+        return newSymbol;
     }
 }
