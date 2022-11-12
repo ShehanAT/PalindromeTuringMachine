@@ -3,7 +3,7 @@ PIXI.BitmapFont.from("foo", style);
 var hardCodedState = [
     // [<current_state>, <current_symbol>, <new_symbol>, <direction>, <new_state>]
     ['0', '0', '_', 'r', '1o'],
-    ['0', '1', '_', 'r', '1o'],
+    ['0', '1', '_', 'r', '1i'],
     ['0', '_', '_', '*', 'accept'],
     ['0', '1', '_', 'r', '1o'],
     ['1i', '_', '_', 'l', '2i'],
@@ -97,27 +97,23 @@ function RenderTapeWPixi() {
 function StartTape(){
     var counter = 0;
     var moveTape = setInterval(() => {
-        if (currentHeadIndex == (tapeSquaresArr.length - 1)){
-            clearInterval(moveTape);
-        }
-        else{
-            var moveTapeDirection = ProcessInput();
-            console.log("moveTapeDirection: " + moveTapeDirection);
-            switch(moveTapeDirection){
-                case "r":
-                    tape_pointer.x += 25;
-                    break;
-                case "l":
-                    tape_pointer.x -= 25;
-                    break;
-                case "halt-reject":
-                    console.log("halt-reject");
-                    clearInterval(moveTape);
-                    break;
-                default:
-                    break;
-            }
-            currentHeadIndex++;
+        var moveTapeDirection = ProcessInput();
+        console.log("moveTapeDirection: " + moveTapeDirection);
+        switch(moveTapeDirection){
+            case "r":
+                tape_pointer.x += 25;
+                currentHeadIndex++;
+                break;
+            case "l":
+                tape_pointer.x -= 25;
+                currentHeadIndex--;
+                break;
+            case "halt-reject":
+                console.log("halt-reject");
+                clearInterval(moveTape);
+                break;
+            default:
+                break;
         }
         counter++;
     
@@ -141,37 +137,42 @@ function ProcessInput() {
     var i = 0;
     var foundMatch = false;
     for ( i = 0 ; i < hardCodedState.length ; i++){
-        // console.log("hardCodedState[i][1]: " + hardCodedState[i][1]);
-        
-        // console.log("hardCodedState[i][0]: " + hardCodedState[i][0]);
-        
-        console.log("i: " + i);
-        if(compareTapeValues(tapeSquaresArr[currentHeadIndex].text, hardCodedState[i][1]) && currentState == hardCodedState[i][0]){
-            // setNewSymbolOnTape(tapeSquaresArr[currentHeadIndex].text, hardCodedState[i][2]);
-            var newTapeSymbol = setNewTapeSymbol(tapeSquaresArr[currentHeadIndex].text, hardCodedState[i][2]);
-            console.log(newTapeSymbol);
-            tapeSquaresArr[currentHeadIndex].text = newTapeSymbol;
+
+        var textComparison = null;
+        var currentTapeVal = null;
+        if(currentHeadIndex >= tapeSquaresArr.length){
+            textComparison = compareTapeValues(" ", hardCodedState[i][1]);
+            currentTapeVal = " ";
+        }else{
+            textComparison = compareTapeValues(tapeSquaresArr[currentHeadIndex].text, hardCodedState[i][1]);
+            currentTapeVal = tapeSquaresArr[currentHeadIndex].text;
+        }
+    
+        if(textComparison && currentState == hardCodedState[i][0]){
+            var newTapeSymbol = setNewTapeSymbol(currentTapeVal, hardCodedState[i][2]);
+            if(currentTapeVal != " "){
+                tapeSquaresArr[currentHeadIndex].text = newTapeSymbol;
+            }
+            
             currentState = hardCodedState[i][4];
+
+            console.log("CHANGING STATE TO: " + hardCodedState[i][4] + ", hardCodedState[i]: " + hardCodedState[i]);
             stateValText.text = hardCodedState[i][4];
             foundMatch = true;
             break;
         }
     }
     if(foundMatch){
-        console.log("found match: true");
-        console.log("currentState: " + currentState);
-        console.log("tapeSquaresArr[currentHeadIndex].text: " + tapeSquaresArr[currentHeadIndex].text);
-        console.log("new direction: " + hardCodedState[i - 1][3]);
-        return hardCodedState[i - 1][3];
+        return hardCodedState[i][3];
     }else{
-        console.log("found match: false");
-        console.log("currentState: " + currentState);
-        console.log("tapeSquaresArr[currentHeadIndex].text: " + tapeSquaresArr[currentHeadIndex].text);
         return "halt-reject";
     }
 }
 
 function compareTapeValues(currentHeadVal, stateCurrentSymbolVal){
+    if(currentHeadVal == " " && stateCurrentSymbolVal == "_"){
+        return true;
+    }
     if(currentHeadVal == stateCurrentSymbolVal){
         return true;
     }else if(stateCurrentSymbolVal == "*"){
