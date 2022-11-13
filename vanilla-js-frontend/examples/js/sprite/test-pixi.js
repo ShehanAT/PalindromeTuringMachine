@@ -25,6 +25,13 @@ var hardCodedState = [
     ['reject', '*', '_', 'l', 'reject'],
     ['reject2', '*', ')', '*', 'halt-reject'],
 ];
+var comparisonValues = {
+    "0": ["0", "*"],
+    "1": ["1", "*"],
+    "*": ["0", "1", "*"],
+    " ": ["_"],
+    "_": ["_"]
+}
 var currentHeadIndex = 0;
 var firstTapeSquare = new PIXI.BitmapText("1", { fontName: "foo" });
 var secondTapeSquare = new PIXI.BitmapText("0", { fontName: "foo" });
@@ -117,7 +124,7 @@ function StartTape(){
         }
         counter++;
     
-    }, 2000);
+    }, 1000);
 
 }
 
@@ -147,7 +154,10 @@ function ProcessInput() {
             textComparison = compareTapeValues(tapeSquaresArr[currentHeadIndex].text, hardCodedState[i][1]);
             currentTapeVal = tapeSquaresArr[currentHeadIndex].text;
         }
-    
+        if(textComparison){
+            console.log("currentState: " + currentState);
+            console.log("hardCodedState[i][0]: " + hardCodedState[i][0]);
+        }
         if(textComparison && currentState == hardCodedState[i][0]){
             var newTapeSymbol = setNewTapeSymbol(currentTapeVal, hardCodedState[i][2]);
             if(currentTapeVal != " "){
@@ -170,16 +180,33 @@ function ProcessInput() {
 }
 
 function compareTapeValues(currentHeadVal, stateCurrentSymbolVal){
-    if(currentHeadVal == " " && stateCurrentSymbolVal == "_"){
-        return true;
-    }
-    if(currentHeadVal == stateCurrentSymbolVal){
-        return true;
-    }else if(stateCurrentSymbolVal == "*"){
+    console.log("currentHeadVal: " + currentHeadVal + "stateCurrentSymbolVal: " + stateCurrentSymbolVal);
+    console.log("comparisonValues[currentHeadVal]: " + comparisonValues[currentHeadVal.toString()][0]);
+    console.log(comparisonValues[currentHeadVal.toString()].includes(stateCurrentSymbolVal.toString()));
+    if(comparisonValues[currentHeadVal.toString()].includes(stateCurrentSymbolVal.toString())){
         return true;
     }else{
         return false;
     }
+
+    // if(currentHeadVal == " " && stateCurrentSymbolVal == "_"){
+    //     console.log('passing1');
+    //     return true;
+    // }
+    // if(currentHeadVal == stateCurrentSymbolVal){
+    //     console.log('passing2');
+    //     return true;
+    // }else if(stateCurrentSymbolVal == "*" && currentHeadVal != " "){
+    //     console.log('passing3');
+    //     return true;
+    // }else if(stateCurrentSymbolVal == "*" && currentHeadVal == " "){
+    //     console.log('passing4');
+    //     return false;
+    // }    
+    // else{
+    //     console.log('passing5');
+    //     return false;
+    // }
 }
 
 function setNewSymbolOnTape(currentTapeSquare, newSymbol){
