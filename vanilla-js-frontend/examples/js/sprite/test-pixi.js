@@ -14,6 +14,7 @@ var hardCodedState = [
     ['2o', '_', '_', '*', 'accept'],
     ['2o', '*', '*', '*', 'reject'],
     ['2i', '1', '_', 'l', '3'],
+    ['2i', '_', '_', '*', 'accept'],
     ['2i', '*', '*', '*', 'reject'],
     ['3', '_', '_', '*', 'accept'],
     ['3', '*', '*', 'l', '4'],
@@ -154,19 +155,23 @@ function ProcessInput() {
             textComparison = compareTapeValues(tapeSquaresArr[currentHeadIndex].text, hardCodedState[i][1]);
             currentTapeVal = tapeSquaresArr[currentHeadIndex].text;
         }
-        if(textComparison){
-            console.log("currentState: " + currentState);
-            console.log("hardCodedState[i][0]: " + hardCodedState[i][0]);
-        }
+    
         if(textComparison && currentState == hardCodedState[i][0]){
             var newTapeSymbol = setNewTapeSymbol(currentTapeVal, hardCodedState[i][2]);
-            if(currentTapeVal != " "){
+    
+            try{
+                console.log("symbol before: " + tapeSquaresArr[currentHeadIndex].text);
                 tapeSquaresArr[currentHeadIndex].text = newTapeSymbol;
+                // FIND WAY TO REPLACE PIXI.BitmapText's text with newTapeSymbol
+                // tapeSquaresArr[currentHeadIndex] = new PIXI.BitmapText(newTapeSymbol, { fontName: "foo" });
+                console.log("symbol after: " + tapeSquaresArr[currentHeadIndex].text);
+    
+            }catch(err){
+                console.log("current head index is empty");
             }
             
             currentState = hardCodedState[i][4];
 
-            console.log("CHANGING STATE TO: " + hardCodedState[i][4] + ", hardCodedState[i]: " + hardCodedState[i]);
             stateValText.text = hardCodedState[i][4];
             foundMatch = true;
             break;
@@ -180,33 +185,14 @@ function ProcessInput() {
 }
 
 function compareTapeValues(currentHeadVal, stateCurrentSymbolVal){
-    console.log("currentHeadVal: " + currentHeadVal + "stateCurrentSymbolVal: " + stateCurrentSymbolVal);
-    console.log("comparisonValues[currentHeadVal]: " + comparisonValues[currentHeadVal.toString()][0]);
-    console.log(comparisonValues[currentHeadVal.toString()].includes(stateCurrentSymbolVal.toString()));
+    if(currentState == "accept" && currentHeadVal == "_"){
+        return true;
+    }
     if(comparisonValues[currentHeadVal.toString()].includes(stateCurrentSymbolVal.toString())){
         return true;
     }else{
         return false;
     }
-
-    // if(currentHeadVal == " " && stateCurrentSymbolVal == "_"){
-    //     console.log('passing1');
-    //     return true;
-    // }
-    // if(currentHeadVal == stateCurrentSymbolVal){
-    //     console.log('passing2');
-    //     return true;
-    // }else if(stateCurrentSymbolVal == "*" && currentHeadVal != " "){
-    //     console.log('passing3');
-    //     return true;
-    // }else if(stateCurrentSymbolVal == "*" && currentHeadVal == " "){
-    //     console.log('passing4');
-    //     return false;
-    // }    
-    // else{
-    //     console.log('passing5');
-    //     return false;
-    // }
 }
 
 function setNewSymbolOnTape(currentTapeSquare, newSymbol){
