@@ -31,17 +31,30 @@ var comparisonValues = {
     "1": ["1", "*"],
     "*": ["0", "1", "*"],
     " ": ["_"],
-    "_": ["_"]
+    "_": ["_"],
+    ")": [")"]
 }
 var currentHeadIndex = 0;
-var firstTapeSquare = new PIXI.BitmapText("1", { fontName: "foo" });
-var secondTapeSquare = new PIXI.BitmapText("0", { fontName: "foo" });
-var thirdTapeSquare = new PIXI.BitmapText("0", { fontName: "foo" });
-var fourthTapeSquare = new PIXI.BitmapText("1", { fontName: "foo" });
-var fifthTapeSquare = new PIXI.BitmapText("0".toString(), { fontName: "foo" });
-var sixthTapeSquare = new PIXI.BitmapText("0", { fontName: "foo" });
-var seventhTapeSquare = new PIXI.BitmapText("1", { fontName: "foo" });
-var stateValText = new PIXI.BitmapText("Current State Value: NA", { fontName: "foo" });
+// var firstTapeSquare = new PIXI.BitmapText("1", { fontName: "foo" });
+// var secondTapeSquare = new PIXI.BitmapText("0", { fontName: "foo" });
+// var thirdTapeSquare = new PIXI.BitmapText("0", { fontName: "foo" });
+// var fourthTapeSquare = new PIXI.BitmapText("1", { fontName: "foo" });
+// var fifthTapeSquare = new PIXI.BitmapText("0".toString(), { fontName: "foo" });
+// var sixthTapeSquare = new PIXI.BitmapText("0", { fontName: "foo" });
+// var seventhTapeSquare = new PIXI.BitmapText("1", { fontName: "foo" });
+var firstTapeSquare = new PIXI.Text("1", { fontName: "foo" });
+var secondTapeSquare = new PIXI.Text("0", { fontName: "foo" });
+var thirdTapeSquare = new PIXI.Text("0", { fontName: "foo" });
+var fourthTapeSquare = new PIXI.Text("1", { fontName: "foo" });
+var fifthTapeSquare = new PIXI.Text("0".toString(), { fontName: "foo" });
+var sixthTapeSquare = new PIXI.Text("0", { fontName: "foo" });
+var seventhTapeSquare = new PIXI.Text("1", { fontName: "foo" });
+var stateValText = new PIXI.Text("Current State Value: NA", 
+{  
+    fill: "#333333",
+    fontSize: 40,
+    fontWeight: 'bold', 
+});
 var currentState = '0';
 var tapeSquaresArr = [firstTapeSquare, secondTapeSquare, thirdTapeSquare, fourthTapeSquare, fifthTapeSquare, sixthTapeSquare, seventhTapeSquare];
 var nextSymbol = '0';
@@ -58,6 +71,13 @@ const tape_pointer = PIXI.Sprite.from('examples/assets/up-arrow-icon.png');
 // center the sprite's anchor point
 tape_pointer.anchor.set(0.5);
 
+stateValText.x = 100;
+stateValText.y = 200;
+stateValText.width = 100;
+stateValText.height = 50;
+
+app.stage.addChild(stateValText);
+
 // move the sprite to the center of the screen
 tape_pointer.x = app.screen.width / 2 + 5;
 tape_pointer.y = (app.screen.height / 2) + 45;
@@ -69,7 +89,6 @@ app.stage.addChild(tape_pointer);
 RenderTapeWPixi();
 RenderStateText();
 StartTape();
-
 
 
 function RenderStateText() {
@@ -125,7 +144,7 @@ function StartTape(){
         }
         counter++;
     
-    }, 1000);
+    }, 500);
 
 }
 
@@ -160,18 +179,17 @@ function ProcessInput() {
             var newTapeSymbol = setNewTapeSymbol(currentTapeVal, hardCodedState[i][2]);
     
             try{
-                console.log("symbol before: " + tapeSquaresArr[currentHeadIndex].text);
+                // console.log("symbol before: " + tapeSquaresArr[currentHeadIndex].text);
                 tapeSquaresArr[currentHeadIndex].text = newTapeSymbol;
                 // FIND WAY TO REPLACE PIXI.BitmapText's text with newTapeSymbol
                 // tapeSquaresArr[currentHeadIndex] = new PIXI.BitmapText(newTapeSymbol, { fontName: "foo" });
-                console.log("symbol after: " + tapeSquaresArr[currentHeadIndex].text);
+                // console.log("symbol after: " + tapeSquaresArr[currentHeadIndex].text);
     
             }catch(err){
                 console.log("current head index is empty");
             }
             
             currentState = hardCodedState[i][4];
-
             stateValText.text = hardCodedState[i][4];
             foundMatch = true;
             break;
@@ -185,7 +203,7 @@ function ProcessInput() {
 }
 
 function compareTapeValues(currentHeadVal, stateCurrentSymbolVal){
-    if(currentState == "accept" && currentHeadVal == "_"){
+    if((currentState == "accept" || currentState == "accept2") && currentHeadVal == "_"){
         return true;
     }
     if(comparisonValues[currentHeadVal.toString()].includes(stateCurrentSymbolVal.toString())){
