@@ -35,13 +35,6 @@ var comparisonValues = {
     ")": [")"]
 }
 var currentHeadIndex = 0;
-// var firstTapeSquare = new PIXI.BitmapText("1", { fontName: "foo" });
-// var secondTapeSquare = new PIXI.BitmapText("0", { fontName: "foo" });
-// var thirdTapeSquare = new PIXI.BitmapText("0", { fontName: "foo" });
-// var fourthTapeSquare = new PIXI.BitmapText("1", { fontName: "foo" });
-// var fifthTapeSquare = new PIXI.BitmapText("0".toString(), { fontName: "foo" });
-// var sixthTapeSquare = new PIXI.BitmapText("0", { fontName: "foo" });
-// var seventhTapeSquare = new PIXI.BitmapText("1", { fontName: "foo" });
 var firstTapeSquare = new PIXI.Text("1", { fontName: "foo" });
 var secondTapeSquare = new PIXI.Text("0", { fontName: "foo" });
 var thirdTapeSquare = new PIXI.Text("0", { fontName: "foo" });
@@ -49,7 +42,13 @@ var fourthTapeSquare = new PIXI.Text("1", { fontName: "foo" });
 var fifthTapeSquare = new PIXI.Text("0".toString(), { fontName: "foo" });
 var sixthTapeSquare = new PIXI.Text("0", { fontName: "foo" });
 var seventhTapeSquare = new PIXI.Text("1", { fontName: "foo" });
-var stateValText = new PIXI.Text("Current State Value: NA", 
+var stateText = new PIXI.Text("Current State: ", 
+{  
+    fill: "#333333",
+    fontSize: 40,
+    fontWeight: 'bold', 
+});
+var stateValText = new PIXI.Text("N/A", 
 {  
     fill: "#333333",
     fontSize: 40,
@@ -71,12 +70,9 @@ const tape_pointer = PIXI.Sprite.from('examples/assets/up-arrow-icon.png');
 // center the sprite's anchor point
 tape_pointer.anchor.set(0.5);
 
-stateValText.x = 100;
-stateValText.y = 200;
-stateValText.width = 100;
-stateValText.height = 50;
 
-app.stage.addChild(stateValText);
+
+
 
 // move the sprite to the center of the screen
 tape_pointer.x = app.screen.width / 2 + 5;
@@ -92,10 +88,21 @@ StartTape();
 
 
 function RenderStateText() {
-    stateValText.x = (app.screen.width / 2) + 50;
-    stateValText.y = (app.screen.height / 2) + 100;
+    stateText.x = 90;
+    stateText.y = 100;
+    stateText.width = 100;
+    stateText.height = 50;
+
+    app.stage.addChild(stateText); 
+
+    stateValText.x = 190;
+    stateValText.y = 100;
     stateValText.width = 50;
     stateValText.height = 50;
+
+    app.stage.addChild(stateValText);
+
+  
 }
 
 function RenderTapeWPixi() {
@@ -179,12 +186,7 @@ function ProcessInput() {
             var newTapeSymbol = setNewTapeSymbol(currentTapeVal, hardCodedState[i][2]);
     
             try{
-                // console.log("symbol before: " + tapeSquaresArr[currentHeadIndex].text);
                 tapeSquaresArr[currentHeadIndex].text = newTapeSymbol;
-                // FIND WAY TO REPLACE PIXI.BitmapText's text with newTapeSymbol
-                // tapeSquaresArr[currentHeadIndex] = new PIXI.BitmapText(newTapeSymbol, { fontName: "foo" });
-                // console.log("symbol after: " + tapeSquaresArr[currentHeadIndex].text);
-    
             }catch(err){
                 console.log("current head index is empty");
             }
