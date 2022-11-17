@@ -58,7 +58,14 @@ var currentState = '0';
 var tapeSquaresArr = [firstTapeSquare, secondTapeSquare, thirdTapeSquare, fourthTapeSquare, fifthTapeSquare, sixthTapeSquare, seventhTapeSquare];
 var nextSymbol = '0';
 var prevSymbol = '0';
+var programOptions = [
+    'Pallindrome',
+    ''
+]
+var currentProgram = 'Pallindrome';
 
+var pallindromeBtn = ;
+var binaryAddisionBtn = ;
 
 
 const app = new PIXI.Application({ backgroundColor: 0x1099bb });
@@ -85,7 +92,43 @@ app.stage.addChild(tape_pointer);
 RenderTapeWPixi();
 RenderStateText();
 StartTape();
+SetupPallindromeTape();
 
+function SetupPallindromeTape(){
+    firstTapeSquare = new PIXI.Text("1", { fontName: "foo" });
+    secondTapeSquare = new PIXI.Text("0", { fontName: "foo" });
+    thirdTapeSquare = new PIXI.Text("0", { fontName: "foo" });
+    fourthTapeSquare = new PIXI.Text("1", { fontName: "foo" });
+    fifthTapeSquare = new PIXI.Text("0".toString(), { fontName: "foo" });
+    sixthTapeSquare = new PIXI.Text("0", { fontName: "foo" });
+    seventhTapeSquare = new PIXI.Text("1", { fontName: "foo" });
+
+    tapeSquaresArr = [firstTapeSquare, secondTapeSquare, thirdTapeSquare, fourthTapeSquare, fifthTapeSquare, sixthTapeSquare, seventhTapeSquare];
+
+    const style = new PIXI.TextStyle();
+
+    for(var i = 0 ; i < tapeSquaresArr.length ; i++){
+        // Apply the font to our text
+        // tapeSquaresArr[i]
+        style.x = app.screen.width / 2;
+        style.y = app.screen.height / 2;
+    
+        tapeSquaresArr[i].x = app.screen.width / 2 + (i * 25);
+        tapeSquaresArr[i].y = app.screen.height / 2;
+    
+        // Update the font style
+        style.fill = 'black';
+    
+        // Update text
+        tapeSquaresArr[i].updateText();
+		
+        app.stage.addChild(tapeSquaresArr[i])
+    }
+}
+
+function SetupBinaryAdditionTape(){
+
+}
 
 function RenderStateText() {
     stateText.x = 90;
@@ -101,9 +144,8 @@ function RenderStateText() {
     stateValText.height = 50;
 
     app.stage.addChild(stateValText);
-
-  
 }
+
 
 function RenderTapeWPixi() {
     const style = new PIXI.TextStyle();
