@@ -37,13 +37,6 @@ var comparisonValues = {
     ")": [")"]
 }
 var currentHeadIndex = 0;
-// var firstTapeSquare = new PIXI.Text("1", { fontName: "foo" });
-// var secondTapeSquare = new PIXI.Text("0", { fontName: "foo" });
-// var thirdTapeSquare = new PIXI.Text("0", { fontName: "foo" });
-// var fourthTapeSquare = new PIXI.Text("1", { fontName: "foo" });
-// var fifthTapeSquare = new PIXI.Text("0".toString(), { fontName: "foo" });
-// var sixthTapeSquare = new PIXI.Text("0", { fontName: "foo" });
-// var seventhTapeSquare = new PIXI.Text("1", { fontName: "foo" });
 var firstTapeSquare = null;
 var secondTapeSquare = null;
 var thirdTapeSquare = null;
@@ -69,18 +62,11 @@ var currentState = '0';
 var tapeSquaresArr = [firstTapeSquare, secondTapeSquare, thirdTapeSquare, fourthTapeSquare, fifthTapeSquare, sixthTapeSquare, seventhTapeSquare];
 var nextSymbol = '0';
 var prevSymbol = '0';
+var gameSpeed = 500;
 const tape_pointer = PIXI.Sprite.from('./assets/up-arrow-icon.png');
-var programOptions = [
-    'Pallindrome',
-    ''
-]
-var currentProgram = 'Pallindrome';
-// var palindromeImage = new PIXI.Texture.fromImage("../assets/palindrome-button.png")
-// var binaryAddisionImage = new PIXI.Texture.fromImage("../assets/binary-addision-button.png")
 
 
 var palindromeBtn = PIXI.Sprite.from("./assets/palindrome-button.png")
-// var palindromeBtn = new PIXI.Sprite()
 palindromeBtn.buttonMode = true;
 palindromeBtn.anchor.set(0.5);
 palindromeBtn.position.x = 200;
@@ -88,9 +74,7 @@ palindromeBtn.position.y = 250;
 palindromeBtn.width = 150;
 palindromeBtn.height = 50;
 palindromeBtn.interactive = true;
-palindromeBtn
-// set the mousedown and touchstart callback...
-.on('mousedown', startPalindromeProgram);
+palindromeBtn.on('mousedown', startPalindromeProgram);
 app.stage.addChild(palindromeBtn);
 
 
@@ -102,13 +86,13 @@ stopBtn.position.y = 250;
 stopBtn.width = 150;
 stopBtn.height = 50;
 stopBtn.interactive = true;
-stopBtn
-// set the mousedown and touchstart callback...
-.on('mousedown', stopProgram);
+stopBtn.on('mousedown', stopProgram);
 app.stage.addChild(stopBtn);
 
+var moveTapeInterval = null;
+
 function stopProgram(){
-    window.setInterval.clearAll();
+    moveTapeInterval.pause();
 }
 
 function startPalindromeProgram() {
@@ -225,32 +209,35 @@ function RenderTapeWPixi() {
     }
 }
 
+function moveTapeLogic() {
+    var counter = 0;
+    var moveTapeDirection = ProcessInput();
+    console.log("moveTapeDirection: " + moveTapeDirection);
+    switch(moveTapeDirection){
+        case "r":
+            tape_pointer.x += 25;
+            currentHeadIndex++;
+            break;
+        case "l":
+            tape_pointer.x -= 25;
+            currentHeadIndex--;
+            break;
+        case "halt-reject":
+            console.log("halt-reject");
+            clearInterval(moveTapeInterval);
+            break;
+        default:
+            break;
+    }
+    counter++;
+    console.log('passing')
+}
 
 function StartTape(){
-    var counter = 0;
-    var moveTape = setInterval(() => {
-        var moveTapeDirection = ProcessInput();
-        console.log("moveTapeDirection: " + moveTapeDirection);
-        switch(moveTapeDirection){
-            case "r":
-                tape_pointer.x += 25;
-                currentHeadIndex++;
-                break;
-            case "l":
-                tape_pointer.x -= 25;
-                currentHeadIndex--;
-                break;
-            case "halt-reject":
-                console.log("halt-reject");
-                clearInterval(moveTape);
-                break;
-            default:
-                break;
-        }
-        counter++;
     
-    }, 500);
-
+    // moveTapeInterval = setInterval(() => {
+    moveTapeInterval = new IntervalTimer(moveTapeLogic, gameSpeed);
+    moveTapeInterval.start();
 }
 
 function MoveTapeInReverse() {
@@ -325,5 +312,60 @@ function setNewTapeSymbol(currentSymbol, newSymbol){
         return currentSymbol;
     }else{
         return newSymbol;
+    }
+}
+
+class IntervalTimer {
+    callbackStartTime;
+    remaining = 0;
+    paused = false;
+    timerId = null;
+    _callback;
+    _delay;
+
+    constructor(callback, delay) {
+        this._callback = callback;
+        this._delay = delay;
+    }
+
+    pause() {
+        if (!this.paused) {
+            this.clear();
+            this.remaining = new Date().getTime() - this.callbackStartTime;
+            this.paused = true;
+        }
+    }
+
+    resume() {
+        if (this.paused) {
+            if (this.remaining) {
+                setTimeout(() => {
+                    this.run();
+                    this.paused = false;
+                    this.start();
+                }, this.remaining);
+            } else {
+                this.paused = false;
+                this.start();
+            }
+        }
+    }
+
+    clear() {
+        clearInterval(this.timerId);
+    }
+
+    start() {
+        this.clear();
+        this.timerId = setInterval(() => {
+
+
+            this.run();
+        }, this._delay);
+    }
+
+    run() {
+        this.callbackStartTime = new Date().getTime();
+        this._callback();
     }
 }
