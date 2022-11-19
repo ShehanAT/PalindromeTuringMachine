@@ -1,3 +1,6 @@
+const app = new PIXI.Application({ backgroundColor: 0x1099bb });
+document.body.appendChild(app.view);
+
 const style = new PIXI.TextStyle();
 PIXI.BitmapFont.from("foo", style);
 var hardCodedState = [
@@ -67,14 +70,26 @@ var currentProgram = 'Pallindrome';
 // var binaryAddisionImage = new PIXI.Texture.fromImage("../assets/binary-addision-button.png")
 
 console.log(PIXI);
-// var palindromeBtn = new PIXI.Sprite("../assets/palindrome-button.png")
-var palindromeBtn = new PIXI.Sprite()
+var palindromeBtn = PIXI.Sprite.from("./assets/palindrome-button.png")
+// var palindromeBtn = new PIXI.Sprite()
 palindromeBtn.buttonMode = true;
 palindromeBtn.anchor.set(0.5);
 palindromeBtn.position.x = 200;
 palindromeBtn.position.y = 250;
+palindromeBtn.width = 150;
+palindromeBtn.height = 50;
 palindromeBtn.interactive = true;
+palindromeBtn
+// set the mousedown and touchstart callback...
+.on('mousedown', startPalindromeProgram)
+app.stage.addChild(palindromeBtn);
 
+function startPalindromeProgram() {
+    RenderTapeWPixi();
+    RenderStateText();
+    StartTape();
+    SetupPallindromeTape();
+}
 // var pallindromeBtn = new PIXI.Button({
 //     x: 500,
 //     y: 10,
@@ -89,14 +104,13 @@ palindromeBtn.interactive = true;
 //     active: true
 // });
 
-// app.stage.addChild(pallindromeBtn);
+
 // app.stage.addChild(binaryAddisionBtn);
 
-const app = new PIXI.Application({ backgroundColor: 0x1099bb });
-document.body.appendChild(app.view);
+
 
 // create a new Sprite from an image path
-const tape_pointer = PIXI.Sprite.from('examples/assets/up-arrow-icon.png');
+const tape_pointer = PIXI.Sprite.from('./assets/up-arrow-icon.png');
 
 // center the sprite's anchor point
 tape_pointer.anchor.set(0.5);
@@ -113,10 +127,7 @@ tape_pointer.height = 30;
 
 app.stage.addChild(tape_pointer);
 
-RenderTapeWPixi();
-RenderStateText();
-StartTape();
-SetupPallindromeTape();
+
 
 function SetupPallindromeTape(){
     firstTapeSquare = new PIXI.Text("1", { fontName: "foo" });
