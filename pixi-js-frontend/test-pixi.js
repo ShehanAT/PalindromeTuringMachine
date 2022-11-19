@@ -1,6 +1,5 @@
 const app = new PIXI.Application({ backgroundColor: 0x1099bb });
 document.body.appendChild(app.view);
-
 const style = new PIXI.TextStyle();
 PIXI.BitmapFont.from("foo", style);
 var hardCodedState = [
@@ -38,29 +37,39 @@ var comparisonValues = {
     ")": [")"]
 }
 var currentHeadIndex = 0;
-var firstTapeSquare = new PIXI.Text("1", { fontName: "foo" });
-var secondTapeSquare = new PIXI.Text("0", { fontName: "foo" });
-var thirdTapeSquare = new PIXI.Text("0", { fontName: "foo" });
-var fourthTapeSquare = new PIXI.Text("1", { fontName: "foo" });
-var fifthTapeSquare = new PIXI.Text("0".toString(), { fontName: "foo" });
-var sixthTapeSquare = new PIXI.Text("0", { fontName: "foo" });
-var seventhTapeSquare = new PIXI.Text("1", { fontName: "foo" });
+// var firstTapeSquare = new PIXI.Text("1", { fontName: "foo" });
+// var secondTapeSquare = new PIXI.Text("0", { fontName: "foo" });
+// var thirdTapeSquare = new PIXI.Text("0", { fontName: "foo" });
+// var fourthTapeSquare = new PIXI.Text("1", { fontName: "foo" });
+// var fifthTapeSquare = new PIXI.Text("0".toString(), { fontName: "foo" });
+// var sixthTapeSquare = new PIXI.Text("0", { fontName: "foo" });
+// var seventhTapeSquare = new PIXI.Text("1", { fontName: "foo" });
+var firstTapeSquare = null;
+var secondTapeSquare = null;
+var thirdTapeSquare = null;
+var fourthTapeSquare = null;
+var fifthTapeSquare = null;
+var sixthTapeSquare = null;
+var seventhTapeSquare = null;
 var stateText = new PIXI.Text("Current State: ", 
 {  
     fill: "#333333",
     fontSize: 40,
     fontWeight: 'bold', 
-});
+}
+);
 var stateValText = new PIXI.Text("N/A", 
 {  
     fill: "#333333",
     fontSize: 40,
     fontWeight: 'bold', 
-});
+}
+);
 var currentState = '0';
 var tapeSquaresArr = [firstTapeSquare, secondTapeSquare, thirdTapeSquare, fourthTapeSquare, fifthTapeSquare, sixthTapeSquare, seventhTapeSquare];
 var nextSymbol = '0';
 var prevSymbol = '0';
+const tape_pointer = PIXI.Sprite.from('./assets/up-arrow-icon.png');
 var programOptions = [
     'Pallindrome',
     ''
@@ -69,7 +78,7 @@ var currentProgram = 'Pallindrome';
 // var palindromeImage = new PIXI.Texture.fromImage("../assets/palindrome-button.png")
 // var binaryAddisionImage = new PIXI.Texture.fromImage("../assets/binary-addision-button.png")
 
-console.log(PIXI);
+
 var palindromeBtn = PIXI.Sprite.from("./assets/palindrome-button.png")
 // var palindromeBtn = new PIXI.Sprite()
 palindromeBtn.buttonMode = true;
@@ -81,14 +90,34 @@ palindromeBtn.height = 50;
 palindromeBtn.interactive = true;
 palindromeBtn
 // set the mousedown and touchstart callback...
-.on('mousedown', startPalindromeProgram)
+.on('mousedown', startPalindromeProgram);
 app.stage.addChild(palindromeBtn);
 
+
+var stopBtn = PIXI.Sprite.from("./assets/stop-icon.jpg")
+stopBtn.buttonMode = true;
+stopBtn.anchor.set(0.5);
+stopBtn.position.x = 250;
+stopBtn.position.y = 250;
+stopBtn.width = 150;
+stopBtn.height = 50;
+stopBtn.interactive = true;
+stopBtn
+// set the mousedown and touchstart callback...
+.on('mousedown', stopProgram);
+app.stage.addChild(stopBtn);
+
+function stopProgram(){
+    window.setInterval.clearAll();
+}
+
 function startPalindromeProgram() {
+    SetupPalindromeTape();
+    RenderTapePointer();
     RenderTapeWPixi();
     RenderStateText();
     StartTape();
-    SetupPallindromeTape();
+    
 }
 // var pallindromeBtn = new PIXI.Button({
 //     x: 500,
@@ -107,29 +136,22 @@ function startPalindromeProgram() {
 
 // app.stage.addChild(binaryAddisionBtn);
 
+function RenderTapePointer() {
+    
+
+    // center the sprite's anchor point
+    tape_pointer.anchor.set(0.5);
+    // move the sprite to the center of the screen
+    tape_pointer.x = app.screen.width / 2 + 5;
+    tape_pointer.y = (app.screen.height / 2) + 45;
+    tape_pointer.width = 30;
+    tape_pointer.height = 30;
+    
+    app.stage.addChild(tape_pointer);    
+}
 
 
-// create a new Sprite from an image path
-const tape_pointer = PIXI.Sprite.from('./assets/up-arrow-icon.png');
-
-// center the sprite's anchor point
-tape_pointer.anchor.set(0.5);
-
-
-
-
-
-// move the sprite to the center of the screen
-tape_pointer.x = app.screen.width / 2 + 5;
-tape_pointer.y = (app.screen.height / 2) + 45;
-tape_pointer.width = 30;
-tape_pointer.height = 30;
-
-app.stage.addChild(tape_pointer);
-
-
-
-function SetupPallindromeTape(){
+function SetupPalindromeTape(){
     firstTapeSquare = new PIXI.Text("1", { fontName: "foo" });
     secondTapeSquare = new PIXI.Text("0", { fontName: "foo" });
     thirdTapeSquare = new PIXI.Text("0", { fontName: "foo" });
@@ -140,11 +162,10 @@ function SetupPallindromeTape(){
 
     tapeSquaresArr = [firstTapeSquare, secondTapeSquare, thirdTapeSquare, fourthTapeSquare, fifthTapeSquare, sixthTapeSquare, seventhTapeSquare];
 
-    const style = new PIXI.TextStyle();
+    
 
     for(var i = 0 ; i < tapeSquaresArr.length ; i++){
         // Apply the font to our text
-        // tapeSquaresArr[i]
         style.x = app.screen.width / 2;
         style.y = app.screen.height / 2;
     
@@ -263,7 +284,10 @@ function ProcessInput() {
             var newTapeSymbol = setNewTapeSymbol(currentTapeVal, hardCodedState[i][2]);
     
             try{
+                console.log("BEFORE: tapeSquares[currentHeadIndex]: " + tapeSquaresArr[currentHeadIndex].text);
                 tapeSquaresArr[currentHeadIndex].text = newTapeSymbol;
+                tapeSquaresArr[currentHeadIndex].updateText();
+                console.log("AFTER: tapeSquares[currentHeadIndex]: " + tapeSquaresArr[currentHeadIndex].text);
             }catch(err){
                 console.log("current head index is empty");
             }
