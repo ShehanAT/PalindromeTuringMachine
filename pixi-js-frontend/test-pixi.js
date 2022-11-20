@@ -1,4 +1,6 @@
-const app = new PIXI.Application({ backgroundColor: 0x1099bb });
+const app = new PIXI.Application({ 
+    antialias: true,
+    backgroundColor: 0x1099bb });
 document.body.appendChild(app.view);
 const style = new PIXI.TextStyle();
 PIXI.BitmapFont.from("foo", style);
@@ -63,6 +65,7 @@ var tapeSquaresArr = [firstTapeSquare, secondTapeSquare, thirdTapeSquare, fourth
 var nextSymbol = '0';
 var prevSymbol = '0';
 var gameSpeed = 500;
+var gameSpeedSlider = null;
 const tape_pointer = PIXI.Sprite.from('./assets/up-arrow-icon.png');
 
 
@@ -102,12 +105,16 @@ app.stage.addChild(resumeBtn);
 
 var moveTapeInterval = null;
 
+function RenderSliderBunnyExample() {
+   
+}
+
 function stopProgram() {
     moveTapeInterval.pause();
 }
 
 function resumeProgram() {
-    moveTapeInterval.resume();
+    moveTapeInterval.resume(gameSpeed);
 }
 
 function startPalindromeProgram() {
@@ -116,25 +123,36 @@ function startPalindromeProgram() {
     RenderTapeWPixi();
     RenderStateText();
     StartTape();
-
+    // RenderGameSpeedSlider();
+    RenderSliderBunnyExample();
 }
-// var pallindromeBtn = new PIXI.Button({
-//     x: 500,
-//     y: 10,
-//     label: 'Pallindrome Program',
-//     active: true
-// });
 
-// var binaryAddisionBtn = new PIXI.Button({
-//     x: 540,
-//     y: 10,
-//     label: 'Binary Addision Program',
-//     active: true
-// });
-
-
-// app.stage.addChild(binaryAddisionBtn);
-
+// function RenderGameSpeedSlider() {
+//     gameSpeedSlider = new PIXI.Slider({
+//         x: 600,
+//         y: 150,
+//         value: -20,
+//         width: 600,
+//         height: 8,
+//         fill: 0xda3031,
+//         stroke: 0xf9bc2e,
+//         strokeWidth: 2,
+//         controlStrokeWidth: 4,
+//         controlRadius: 24,
+//         theme: 'red',
+//         tooltip: 'Range: 0 - 100',
+//         onStart: (event, slider) => {
+//             console.log('Started', event)
+//         },
+//         onUpdate: (event, slider) => {
+//             slider.tooltip.content = slider.value
+//         },
+//         onComplete: function(event) {
+//             console.log('Completed', this)
+//         }
+//     })
+//     app.scene.addChild(gameSpeedSlider);
+// }
 function RenderTapePointer() {
 
 
@@ -240,12 +258,12 @@ function moveTapeLogic() {
         case "halt-reject":
             console.log("halt-reject");
             clearInterval(moveTapeInterval);
+            moveTapeInterval.clear();
             break;
         default:
             break;
     }
     counter++;
-    console.log('passing')
 }
 
 function StartTape() {
@@ -351,16 +369,18 @@ class IntervalTimer {
         }
     }
 
-    resume() {
+    resume(newGameSpeed) {
         if (this.paused) {
             if (this.remaining) {
                 setTimeout(() => {
                     this.run();
                     this.paused = false;
+                    this._delay = newGameSpeed;
                     this.start();
                 }, this.remaining);
             } else {
                 this.paused = false;
+                this._delay = newGameSpeed;
                 this.start();
             }
         }
@@ -383,4 +403,67 @@ class IntervalTimer {
         this.callbackStartTime = new Date().getTime();
         this._callback();
     }
+}
+
+const stageHeight = app.screen.height;
+const stageWidth = app.screen.width;
+
+const sliderWidth = 320;
+const slider = new PIXI.Graphics()
+    .beginFill(0x272d37)
+    .drawRect(0, 0, sliderWidth, 4);
+
+slider.x = (stageWidth - sliderWidth) / 2;
+slider.y = stageHeight * 0.75;
+
+// Draw the handle
+const handle = new PIXI.Graphics()
+    .beginFill(0xffffff)
+    .drawCircle(0, 0, 8);
+handle.y = slider.height / 2;
+handle.x = sliderWidth / 2;
+handle.interactive = true;
+handle.cursor = 'pointer';
+
+handle
+    .on('pointerdown', onDragStart)
+    .on('pointerup', onDragEnd)
+    .on('pointerupoutside', onDragEnd);
+
+app.stage.addChild(slider);
+slider.addChild(handle);
+
+// Add title
+const title = new PIXI.Text('Palindrome Program Turing Machine', {
+    fill: '#272d37',
+    fontFamily: 'Roboto',
+    fontSize: 20,
+    align: 'center',
+});
+title.roundPixels = true;
+title.x = stageWidth / 2;
+title.y = 40;
+title.anchor.set(0.5, 0);
+app.stage.addChild(title);
+
+function onDrag(e) {
+    const halfHandleWidth = handle.width / 2;
+    handle.x = Math.max(halfHandleWidth, Math.min(
+        slider.toLocal(e.data.global).x,
+        sliderWidth - halfHandleWidth,
+    ));
+    const t = Math.round((2 * ((handle.x / sliderWidth))) * 1000);
+    gameSpeed = t;
+}
+
+// Listen to pointermove on stage once handle is pressed.
+function onDragStart() {
+    app.stage.interactive = true;
+    app.stage.on('pointermove', onDrag)
+}
+
+// Stop dragging feedback once the handle is released.
+function onDragEnd(e) {
+    app.stage.interactive = false;
+    // app.stage._events.removeEventListener('pointermove', onDrag);
 }
