@@ -44,19 +44,19 @@ var fourthTapeSquare = null;
 var fifthTapeSquare = null;
 var sixthTapeSquare = null;
 var seventhTapeSquare = null;
-var stateText = new PIXI.Text("Current State: ", 
-{  
-    fill: "#333333",
-    fontSize: 40,
-    fontWeight: 'bold', 
-}
+var stateText = new PIXI.Text("Current State: ",
+    {
+        fill: "#333333",
+        fontSize: 40,
+        fontWeight: 'bold',
+    }
 );
-var stateValText = new PIXI.Text("N/A", 
-{  
-    fill: "#333333",
-    fontSize: 40,
-    fontWeight: 'bold', 
-}
+var stateValText = new PIXI.Text("N/A",
+    {
+        fill: "#333333",
+        fontSize: 40,
+        fontWeight: 'bold',
+    }
 );
 var currentState = '0';
 var tapeSquaresArr = [firstTapeSquare, secondTapeSquare, thirdTapeSquare, fourthTapeSquare, fifthTapeSquare, sixthTapeSquare, seventhTapeSquare];
@@ -78,21 +78,36 @@ palindromeBtn.on('mousedown', startPalindromeProgram);
 app.stage.addChild(palindromeBtn);
 
 
-var stopBtn = PIXI.Sprite.from("./assets/stop-icon.jpg")
+var stopBtn = PIXI.Sprite.from("./assets/stop-icon.png")
 stopBtn.buttonMode = true;
 stopBtn.anchor.set(0.5);
-stopBtn.position.x = 250;
-stopBtn.position.y = 250;
+stopBtn.position.x = 400;
+stopBtn.position.y = 150;
 stopBtn.width = 150;
-stopBtn.height = 50;
+stopBtn.height = 150;
 stopBtn.interactive = true;
 stopBtn.on('mousedown', stopProgram);
 app.stage.addChild(stopBtn);
 
+var resumeBtn = PIXI.Sprite.from("./assets/resume-icon.png")
+resumeBtn.buttonMode = true;
+resumeBtn.anchor.set(0.5);
+resumeBtn.position.x = 600;
+resumeBtn.position.y = 150;
+resumeBtn.width = 150;
+resumeBtn.height = 150;
+resumeBtn.interactive = true;
+resumeBtn.on('mousedown', resumeProgram);
+app.stage.addChild(resumeBtn);
+
 var moveTapeInterval = null;
 
-function stopProgram(){
+function stopProgram() {
     moveTapeInterval.pause();
+}
+
+function resumeProgram() {
+    moveTapeInterval.resume();
 }
 
 function startPalindromeProgram() {
@@ -101,7 +116,7 @@ function startPalindromeProgram() {
     RenderTapeWPixi();
     RenderStateText();
     StartTape();
-    
+
 }
 // var pallindromeBtn = new PIXI.Button({
 //     x: 500,
@@ -121,7 +136,7 @@ function startPalindromeProgram() {
 // app.stage.addChild(binaryAddisionBtn);
 
 function RenderTapePointer() {
-    
+
 
     // center the sprite's anchor point
     tape_pointer.anchor.set(0.5);
@@ -130,12 +145,12 @@ function RenderTapePointer() {
     tape_pointer.y = (app.screen.height / 2) + 45;
     tape_pointer.width = 30;
     tape_pointer.height = 30;
-    
-    app.stage.addChild(tape_pointer);    
+
+    app.stage.addChild(tape_pointer);
 }
 
 
-function SetupPalindromeTape(){
+function SetupPalindromeTape() {
     firstTapeSquare = new PIXI.Text("1", { fontName: "foo" });
     secondTapeSquare = new PIXI.Text("0", { fontName: "foo" });
     thirdTapeSquare = new PIXI.Text("0", { fontName: "foo" });
@@ -146,27 +161,27 @@ function SetupPalindromeTape(){
 
     tapeSquaresArr = [firstTapeSquare, secondTapeSquare, thirdTapeSquare, fourthTapeSquare, fifthTapeSquare, sixthTapeSquare, seventhTapeSquare];
 
-    
 
-    for(var i = 0 ; i < tapeSquaresArr.length ; i++){
+
+    for (var i = 0; i < tapeSquaresArr.length; i++) {
         // Apply the font to our text
         style.x = app.screen.width / 2;
         style.y = app.screen.height / 2;
-    
+
         tapeSquaresArr[i].x = app.screen.width / 2 + (i * 25);
         tapeSquaresArr[i].y = app.screen.height / 2;
-    
+
         // Update the font style
         style.fill = 'black';
-    
+
         // Update text
         tapeSquaresArr[i].updateText();
-		
+
         app.stage.addChild(tapeSquaresArr[i])
     }
 }
 
-function SetupBinaryAdditionTape(){
+function SetupBinaryAdditionTape() {
 
 }
 
@@ -176,7 +191,7 @@ function RenderStateText() {
     stateText.width = 100;
     stateText.height = 50;
 
-    app.stage.addChild(stateText); 
+    app.stage.addChild(stateText);
 
     stateValText.x = 190;
     stateValText.y = 100;
@@ -190,21 +205,21 @@ function RenderStateText() {
 function RenderTapeWPixi() {
     const style = new PIXI.TextStyle();
 
-    for(var i = 0 ; i < 7 ; i++){
+    for (var i = 0; i < 7; i++) {
         // Apply the font to our text
         tapeSquaresArr[i]
         style.x = app.screen.width / 2;
         style.y = app.screen.height / 2;
-    
+
         tapeSquaresArr[i].x = app.screen.width / 2 + (i * 25);
         tapeSquaresArr[i].y = app.screen.height / 2;
-    
+
         // Update the font style
         style.fill = 'black';
-    
+
         // Update text
         tapeSquaresArr[i].updateText();
-		
+
         app.stage.addChild(tapeSquaresArr[i])
     }
 }
@@ -213,7 +228,7 @@ function moveTapeLogic() {
     var counter = 0;
     var moveTapeDirection = ProcessInput();
     console.log("moveTapeDirection: " + moveTapeDirection);
-    switch(moveTapeDirection){
+    switch (moveTapeDirection) {
         case "r":
             tape_pointer.x += 25;
             currentHeadIndex++;
@@ -233,8 +248,8 @@ function moveTapeLogic() {
     console.log('passing')
 }
 
-function StartTape(){
-    
+function StartTape() {
+
     // moveTapeInterval = setInterval(() => {
     moveTapeInterval = new IntervalTimer(moveTapeLogic, gameSpeed);
     moveTapeInterval.start();
@@ -243,8 +258,8 @@ function StartTape(){
 function MoveTapeInReverse() {
     var moveTape = setInterval(() => {
         tape_pointer.x -= 25;
-        
-        if (currentHeadIndex == 0){
+
+        if (currentHeadIndex == 0) {
             clearInterval(moveTape);
         }
         currentHeadIndex--;
@@ -255,62 +270,62 @@ function MoveTapeInReverse() {
 function ProcessInput() {
     var i = 0;
     var foundMatch = false;
-    for ( i = 0 ; i < hardCodedState.length ; i++){
+    for (i = 0; i < hardCodedState.length; i++) {
 
         var textComparison = null;
         var currentTapeVal = null;
-        if(currentHeadIndex >= tapeSquaresArr.length){
+        if (currentHeadIndex >= tapeSquaresArr.length) {
             textComparison = compareTapeValues(" ", hardCodedState[i][1]);
             currentTapeVal = " ";
-        }else{
+        } else {
             textComparison = compareTapeValues(tapeSquaresArr[currentHeadIndex].text, hardCodedState[i][1]);
             currentTapeVal = tapeSquaresArr[currentHeadIndex].text;
         }
-    
-        if(textComparison && currentState == hardCodedState[i][0]){
+
+        if (textComparison && currentState == hardCodedState[i][0]) {
             var newTapeSymbol = setNewTapeSymbol(currentTapeVal, hardCodedState[i][2]);
-    
-            try{
+
+            try {
                 console.log("BEFORE: tapeSquares[currentHeadIndex]: " + tapeSquaresArr[currentHeadIndex].text);
                 tapeSquaresArr[currentHeadIndex].text = newTapeSymbol;
                 tapeSquaresArr[currentHeadIndex].updateText();
                 console.log("AFTER: tapeSquares[currentHeadIndex]: " + tapeSquaresArr[currentHeadIndex].text);
-            }catch(err){
+            } catch (err) {
                 console.log("current head index is empty");
             }
-            
+
             currentState = hardCodedState[i][4];
             stateValText.text = hardCodedState[i][4];
             foundMatch = true;
             break;
         }
     }
-    if(foundMatch){
+    if (foundMatch) {
         return hardCodedState[i][3];
-    }else{
+    } else {
         return "halt-reject";
     }
 }
 
-function compareTapeValues(currentHeadVal, stateCurrentSymbolVal){
-    if((currentState == "accept" || currentState == "accept2") && currentHeadVal == "_"){
+function compareTapeValues(currentHeadVal, stateCurrentSymbolVal) {
+    if ((currentState == "accept" || currentState == "accept2") && currentHeadVal == "_") {
         return true;
     }
-    if(comparisonValues[currentHeadVal.toString()].includes(stateCurrentSymbolVal.toString())){
+    if (comparisonValues[currentHeadVal.toString()].includes(stateCurrentSymbolVal.toString())) {
         return true;
-    }else{
+    } else {
         return false;
     }
 }
 
-function setNewSymbolOnTape(currentTapeSquare, newSymbol){
+function setNewSymbolOnTape(currentTapeSquare, newSymbol) {
     currentTapeSquare.text = newSymbol;
 }
 
-function setNewTapeSymbol(currentSymbol, newSymbol){
-    if(newSymbol == "*"){
+function setNewTapeSymbol(currentSymbol, newSymbol) {
+    if (newSymbol == "*") {
         return currentSymbol;
-    }else{
+    } else {
         return newSymbol;
     }
 }
