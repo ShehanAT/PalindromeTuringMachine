@@ -46,8 +46,6 @@ var fourthTapeSquare = null;
 var fifthTapeSquare = null;
 var sixthTapeSquare = null;
 var seventhTapeSquare = null;
-const stageHeight = app.screen.height;
-const stageWidth = app.screen.width;
 var stateText = new PIXI.Text("Current State: ",
     {
         fill: "#333333",
@@ -71,16 +69,16 @@ var gameSpeedSlider = null;
 const tape_pointer = PIXI.Sprite.from('./assets/up-arrow-icon.png');
 
 
-var startBtn = PIXI.Sprite.from("./assets/start-icon.png")
-startBtn.buttonMode = true;
-startBtn.anchor.set(0.5);
-startBtn.position.x = 200;
-startBtn.position.y = 150;
-startBtn.width = 50;
-startBtn.height = 50;
-startBtn.interactive = true;
-startBtn.on('mousedown', startPalindromeProgram);
-app.stage.addChild(startBtn);
+var palindromeBtn = PIXI.Sprite.from("./assets/palindrome-button.png")
+palindromeBtn.buttonMode = true;
+palindromeBtn.anchor.set(0.5);
+palindromeBtn.position.x = 200;
+palindromeBtn.position.y = 250;
+palindromeBtn.width = 150;
+palindromeBtn.height = 50;
+palindromeBtn.interactive = true;
+palindromeBtn.on('mousedown', startPalindromeProgram);
+app.stage.addChild(palindromeBtn);
 
 
 var stopBtn = PIXI.Sprite.from("./assets/stop-icon.png")
@@ -88,8 +86,8 @@ stopBtn.buttonMode = true;
 stopBtn.anchor.set(0.5);
 stopBtn.position.x = 400;
 stopBtn.position.y = 150;
-stopBtn.width = 50;
-stopBtn.height = 50;
+stopBtn.width = 150;
+stopBtn.height = 150;
 stopBtn.interactive = true;
 stopBtn.on('mousedown', stopProgram);
 app.stage.addChild(stopBtn);
@@ -99,13 +97,17 @@ resumeBtn.buttonMode = true;
 resumeBtn.anchor.set(0.5);
 resumeBtn.position.x = 600;
 resumeBtn.position.y = 150;
-resumeBtn.width = 50;
-resumeBtn.height = 50;
+resumeBtn.width = 150;
+resumeBtn.height = 150;
 resumeBtn.interactive = true;
 resumeBtn.on('mousedown', resumeProgram);
 app.stage.addChild(resumeBtn);
 
 var moveTapeInterval = null;
+
+function RenderSliderBunnyExample() {
+   
+}
 
 function stopProgram() {
     moveTapeInterval.pause();
@@ -116,13 +118,41 @@ function resumeProgram() {
 }
 
 function startPalindromeProgram() {
+    SetupPalindromeTape();
     RenderTapePointer();
     RenderTapeWPixi();
     RenderStateText();
     StartTape();
-    RenderGameSpeedSlider();
+    // RenderGameSpeedSlider();
+    RenderSliderBunnyExample();
 }
 
+// function RenderGameSpeedSlider() {
+//     gameSpeedSlider = new PIXI.Slider({
+//         x: 600,
+//         y: 150,
+//         value: -20,
+//         width: 600,
+//         height: 8,
+//         fill: 0xda3031,
+//         stroke: 0xf9bc2e,
+//         strokeWidth: 2,
+//         controlStrokeWidth: 4,
+//         controlRadius: 24,
+//         theme: 'red',
+//         tooltip: 'Range: 0 - 100',
+//         onStart: (event, slider) => {
+//             console.log('Started', event)
+//         },
+//         onUpdate: (event, slider) => {
+//             slider.tooltip.content = slider.value
+//         },
+//         onComplete: function(event) {
+//             console.log('Completed', this)
+//         }
+//     })
+//     app.scene.addChild(gameSpeedSlider);
+// }
 function RenderTapePointer() {
 
 
@@ -157,7 +187,7 @@ function SetupPalindromeTape() {
         style.y = app.screen.height / 2;
 
         tapeSquaresArr[i].x = app.screen.width / 2 + (i * 25);
-        tapeSquaresArr[i].y = app.screen.height / 6;
+        tapeSquaresArr[i].y = app.screen.height / 2;
 
         // Update the font style
         style.fill = 'black';
@@ -174,16 +204,15 @@ function SetupBinaryAdditionTape() {
 }
 
 function RenderStateText() {
-    stateText.x = 50;
-    stateText.y = 25;
-    
+    stateText.x = 90;
+    stateText.y = 100;
     stateText.width = 100;
     stateText.height = 50;
 
     app.stage.addChild(stateText);
 
     stateValText.x = 190;
-    stateValText.y = 25;
+    stateValText.y = 100;
     stateValText.width = 50;
     stateValText.height = 50;
 
@@ -192,25 +221,16 @@ function RenderStateText() {
 
 
 function RenderTapeWPixi() {
-    firstTapeSquare = new PIXI.Text("1", { fontName: "foo" });
-    secondTapeSquare = new PIXI.Text("0", { fontName: "foo" });
-    thirdTapeSquare = new PIXI.Text("0", { fontName: "foo" });
-    fourthTapeSquare = new PIXI.Text("1", { fontName: "foo" });
-    fifthTapeSquare = new PIXI.Text("0".toString(), { fontName: "foo" });
-    sixthTapeSquare = new PIXI.Text("0", { fontName: "foo" });
-    seventhTapeSquare = new PIXI.Text("1", { fontName: "foo" });
-
-    tapeSquaresArr = [firstTapeSquare, secondTapeSquare, thirdTapeSquare, fourthTapeSquare, fifthTapeSquare, sixthTapeSquare, seventhTapeSquare];
-
     const style = new PIXI.TextStyle();
 
     for (var i = 0; i < 7; i++) {
         // Apply the font to our text
+        tapeSquaresArr[i]
         style.x = app.screen.width / 2;
         style.y = app.screen.height / 2;
-        console.log(app.screen.height / 2);
-        tapeSquaresArr[i].x = (app.screen.width - 100) / 2 + (i * 25);
-        tapeSquaresArr[i].y = 400;
+
+        tapeSquaresArr[i].x = app.screen.width / 2 + (i * 25);
+        tapeSquaresArr[i].y = app.screen.height / 2;
 
         // Update the font style
         style.fill = 'black';
@@ -385,60 +405,33 @@ class IntervalTimer {
     }
 }
 
-function RenderGameSpeedSlider() {
-    
+const stageHeight = app.screen.height;
+const stageWidth = app.screen.width;
 
+const sliderWidth = 320;
+const slider = new PIXI.Graphics()
+    .beginFill(0x272d37)
+    .drawRect(0, 0, sliderWidth, 4);
 
-    const sliderWidth = 320;
-    const slider = new PIXI.Graphics()
-        .beginFill(0x272d37)
-        .drawRect(0, 0, sliderWidth, 4);
+slider.x = (stageWidth - sliderWidth) / 2;
+slider.y = stageHeight * 0.75;
 
-    slider.x = (stageWidth - sliderWidth) / 2;
-    slider.y = stageHeight * 0.5;
+// Draw the handle
+const handle = new PIXI.Graphics()
+    .beginFill(0xffffff)
+    .drawCircle(0, 0, 8);
+handle.y = slider.height / 2;
+handle.x = sliderWidth / 2;
+handle.interactive = true;
+handle.cursor = 'pointer';
 
-    // Draw the handle
-    const handle = new PIXI.Graphics()
-        .beginFill(0xffffff)
-        .drawCircle(0, 0, 8);
-    handle.y = slider.height / 2;
-    handle.x = sliderWidth / 2;
-    handle.interactive = true;
-    handle.cursor = 'pointer';
+handle
+    .on('pointerdown', onDragStart)
+    .on('pointerup', onDragEnd)
+    .on('pointerupoutside', onDragEnd);
 
-    handle
-        .on('pointerdown', onDragStart)
-        .on('pointerup', onDragEnd)
-        .on('pointerupoutside', onDragEnd);
-
-    app.stage.addChild(slider);
-    slider.addChild(handle);
-
-    function onDrag(e) {
-        const halfHandleWidth = handle.width / 2;
-        handle.x = Math.max(halfHandleWidth, Math.min(
-            slider.toLocal(e.data.global).x,
-            sliderWidth - halfHandleWidth,
-        ));
-        const t = Math.round((2 * ((handle.x / sliderWidth))) * 1000);
-        gameSpeed = t;
-    }
-    
-    // Listen to pointermove on stage once handle is pressed.
-    function onDragStart() {
-        app.stage.interactive = true;
-        app.stage.on('pointermove', onDrag)
-    }
-    
-    // Stop dragging feedback once the handle is released.
-    function onDragEnd(e) {
-        app.stage.interactive = false;
-        // app.stage._events.removeEventListener('pointermove', onDrag);
-    }
-    
-
-}
-
+app.stage.addChild(slider);
+slider.addChild(handle);
 
 // Add title
 const title = new PIXI.Text('Palindrome Program Turing Machine', {
@@ -453,15 +446,24 @@ title.y = 40;
 title.anchor.set(0.5, 0);
 app.stage.addChild(title);
 
-const gameSpeedTitle = new PIXI.Text('Select Game Speed', {
-    fill: '#272d37',
-    fontFamily: 'Roboto',
-    fontSize: 20,
-    align: 'center',
-});
+function onDrag(e) {
+    const halfHandleWidth = handle.width / 2;
+    handle.x = Math.max(halfHandleWidth, Math.min(
+        slider.toLocal(e.data.global).x,
+        sliderWidth - halfHandleWidth,
+    ));
+    const t = Math.round((2 * ((handle.x / sliderWidth))) * 1000);
+    gameSpeed = t;
+}
 
-gameSpeedTitle.roundPixels = true;
-gameSpeedTitle.x = stageWidth / 2;
-gameSpeedTitle.y = 300;
-gameSpeedTitle.anchor.set(0.5, 0);
-app.stage.addChild(gameSpeedTitle);
+// Listen to pointermove on stage once handle is pressed.
+function onDragStart() {
+    app.stage.interactive = true;
+    app.stage.on('pointermove', onDrag)
+}
+
+// Stop dragging feedback once the handle is released.
+function onDragEnd(e) {
+    app.stage.interactive = false;
+    // app.stage._events.removeEventListener('pointermove', onDrag);
+}
