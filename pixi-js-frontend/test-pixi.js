@@ -82,6 +82,17 @@ startBtn.interactive = true;
 startBtn.on('mousedown', startPalindromeProgram);
 app.stage.addChild(startBtn);
 
+var restartBtn = PIXI.Sprite.from("./assets/restart-icon-v2.png")
+restartBtn.buttonMode = true;
+restartBtn.anchor.set(0.5);
+restartBtn.position.x = 200;
+restartBtn.position.y = 150;
+restartBtn.width = 50;
+restartBtn.height = 50;
+restartBtn.interactive = true;
+restartBtn.on('mousedown', restartPalindromeProgram);
+app.stage.addChild(restartBtn);
+restartBtn.visible = false;
 
 var stopBtn = PIXI.Sprite.from("./assets/stop-icon.png")
 stopBtn.buttonMode = true;
@@ -109,10 +120,41 @@ var moveTapeInterval = null;
 
 function stopProgram() {
     moveTapeInterval.pause();
+    toggleGameSpeedSliderVisible(true);
 }
 
 function resumeProgram() {
     moveTapeInterval.resume(gameSpeed);
+    toggleGameSpeedSliderVisible(false);
+}
+
+function restartPalindromeProgram() {
+    ResetGame();
+    StartTape();
+}
+
+function ResetGame() {
+    // Reset tape numbers to defaults
+    const tapeNumDefaults = ["1", "0", "0", "1", "0", "0", "1"];
+
+    for (var i = 0; i < tapeSquaresArr.length; i++) {
+        // Apply the font to our text
+        tapeSquaresArr[i].text = tapeNumDefaults[i];
+
+        // Update text
+        tapeSquaresArr[i].updateText();
+    }
+
+    // Reset tape pointer to default position
+    tape_pointer.x = app.screen.width / 2 - 45;
+    tape_pointer.y = (app.screen.height / 2) + 150;
+
+    // Reset current head index and current state variables to 0 
+    currentHeadIndex = 0;
+    currentState = '0';
+
+    toggleStartBtnVisible(false);
+    toggleGameSpeedSliderVisible(false);
 }
 
 function startPalindromeProgram() {
@@ -120,8 +162,28 @@ function startPalindromeProgram() {
     RenderTapeWPixi();
     RenderStateText();
     StartTape();
-    RenderGameSpeedSlider();
+    toggleStartBtnVisible(false);
+    toggleGameSpeedSliderVisible(false);
 }
+
+function toggleStartBtnVisible(visible){
+    startBtn.visible = visible;
+}
+
+function toggleGameSpeedSliderVisible(visible){
+    handle.visible = visible;
+    slider.visible = visible;
+    gameSpeedTitle.visible = visible;
+    fasterSpeedText.visible = visible;
+    slowerSpeedText.visible = visible;
+    startBtnLabel.visible = visible;
+}
+
+function toggleRestartButton(visible){
+    restartBtn.visible = visible;
+    restartBtnLabel.visible = visible;
+}
+
 
 function RenderTapePointer() {
 
@@ -129,8 +191,8 @@ function RenderTapePointer() {
     // center the sprite's anchor point
     tape_pointer.anchor.set(0.5);
     // move the sprite to the center of the screen
-    tape_pointer.x = app.screen.width / 2 + 5;
-    tape_pointer.y = (app.screen.height / 2) + 45;
+    tape_pointer.x = app.screen.width / 2 - 45;
+    tape_pointer.y = (app.screen.height / 2) + 150;
     tape_pointer.width = 30;
     tape_pointer.height = 30;
 
@@ -143,7 +205,7 @@ function SetupPalindromeTape() {
     secondTapeSquare = new PIXI.Text("0", { fontName: "foo" });
     thirdTapeSquare = new PIXI.Text("0", { fontName: "foo" });
     fourthTapeSquare = new PIXI.Text("1", { fontName: "foo" });
-    fifthTapeSquare = new PIXI.Text("0".toString(), { fontName: "foo" });
+    fifthTapeSquare = new PIXI.Text("0", { fontName: "foo" });
     sixthTapeSquare = new PIXI.Text("0", { fontName: "foo" });
     seventhTapeSquare = new PIXI.Text("1", { fontName: "foo" });
 
@@ -175,15 +237,15 @@ function SetupBinaryAdditionTape() {
 
 function RenderStateText() {
     stateText.x = 50;
-    stateText.y = 25;
+    stateText.y = 400;
     
     stateText.width = 100;
     stateText.height = 50;
 
     app.stage.addChild(stateText);
 
-    stateValText.x = 190;
-    stateValText.y = 25;
+    stateValText.x = 170;
+    stateValText.y = 400;
     stateValText.width = 50;
     stateValText.height = 50;
 
@@ -223,8 +285,8 @@ function RenderTapeWPixi() {
 }
 
 function moveTapeLogic() {
-    var counter = 0;
     var moveTapeDirection = ProcessInput();
+    var counter = 0;
     console.log("moveTapeDirection: " + moveTapeDirection);
     switch (moveTapeDirection) {
         case "r":
@@ -239,6 +301,7 @@ function moveTapeLogic() {
             console.log("halt-reject");
             clearInterval(moveTapeInterval);
             moveTapeInterval.clear();
+            toggleRestartButton(true);
             break;
         default:
             break;
@@ -251,18 +314,6 @@ function StartTape() {
     // moveTapeInterval = setInterval(() => {
     moveTapeInterval = new IntervalTimer(moveTapeLogic, gameSpeed);
     moveTapeInterval.start();
-}
-
-function MoveTapeInReverse() {
-    var moveTape = setInterval(() => {
-        tape_pointer.x -= 25;
-
-        if (currentHeadIndex == 0) {
-            clearInterval(moveTape);
-        }
-        currentHeadIndex--;
-
-    }, 1000);
 }
 
 function ProcessInput() {
@@ -373,8 +424,6 @@ class IntervalTimer {
     start() {
         this.clear();
         this.timerId = setInterval(() => {
-
-
             this.run();
         }, this._delay);
     }
@@ -385,58 +434,53 @@ class IntervalTimer {
     }
 }
 
-function RenderGameSpeedSlider() {
-    
 
 
-    const sliderWidth = 320;
-    const slider = new PIXI.Graphics()
-        .beginFill(0x272d37)
-        .drawRect(0, 0, sliderWidth, 4);
+const sliderWidth = 320;
+const slider = new PIXI.Graphics()
+    .beginFill(0x272d37)
+    .drawRect(0, 0, sliderWidth, 4);
 
-    slider.x = (stageWidth - sliderWidth) / 2;
-    slider.y = stageHeight * 0.5;
+slider.x = (stageWidth - sliderWidth) / 2;
+slider.y = stageHeight * 0.5;
 
-    // Draw the handle
-    const handle = new PIXI.Graphics()
-        .beginFill(0xffffff)
-        .drawCircle(0, 0, 8);
-    handle.y = slider.height / 2;
-    handle.x = sliderWidth / 2;
-    handle.interactive = true;
-    handle.cursor = 'pointer';
+// Draw the handle
+const handle = new PIXI.Graphics()
+    .beginFill(0xffffff)
+    .drawCircle(0, 0, 8);
+handle.y = slider.height / 2;
+handle.x = sliderWidth / 2;
+handle.interactive = true;
+handle.cursor = 'pointer';
 
-    handle
-        .on('pointerdown', onDragStart)
-        .on('pointerup', onDragEnd)
-        .on('pointerupoutside', onDragEnd);
+handle
+    .on('pointerdown', onDragStart)
+    .on('pointerup', onDragEnd)
+    .on('pointerupoutside', onDragEnd);
 
-    app.stage.addChild(slider);
-    slider.addChild(handle);
+app.stage.addChild(slider);
+slider.addChild(handle);
 
-    function onDrag(e) {
-        const halfHandleWidth = handle.width / 2;
-        handle.x = Math.max(halfHandleWidth, Math.min(
-            slider.toLocal(e.data.global).x,
-            sliderWidth - halfHandleWidth,
-        ));
-        const t = Math.round((2 * ((handle.x / sliderWidth))) * 1000);
-        gameSpeed = t;
-    }
-    
-    // Listen to pointermove on stage once handle is pressed.
-    function onDragStart() {
-        app.stage.interactive = true;
-        app.stage.on('pointermove', onDrag)
-    }
-    
-    // Stop dragging feedback once the handle is released.
-    function onDragEnd(e) {
-        app.stage.interactive = false;
-        // app.stage._events.removeEventListener('pointermove', onDrag);
-    }
-    
+function onDrag(e) {
+    const halfHandleWidth = handle.width / 2;
+    handle.x = Math.max(halfHandleWidth, Math.min(
+        slider.toLocal(e.data.global).x,
+        sliderWidth - halfHandleWidth,
+    ));
+    const t = Math.round((2 * ((handle.x / sliderWidth))) * 1000);
+    gameSpeed = t;
+}
 
+// Listen to pointermove on stage once handle is pressed.
+function onDragStart() {
+    app.stage.interactive = true;
+    app.stage.on('pointermove', onDrag)
+}
+
+// Stop dragging feedback once the handle is released.
+function onDragEnd(e) {
+    app.stage.interactive = false;
+    // app.stage._events.removeEventListener('pointermove', onDrag);
 }
 
 
@@ -462,6 +506,88 @@ const gameSpeedTitle = new PIXI.Text('Select Game Speed', {
 
 gameSpeedTitle.roundPixels = true;
 gameSpeedTitle.x = stageWidth / 2;
-gameSpeedTitle.y = 300;
+gameSpeedTitle.y = 250;
 gameSpeedTitle.anchor.set(0.5, 0);
 app.stage.addChild(gameSpeedTitle);
+
+const fasterSpeedText = new PIXI.Text('Faster', {
+    fill: '#272d37',
+    fontFamily: 'Roboto',
+    fontSize: 20,
+    align: 'center',
+});
+
+fasterSpeedText.roundPixels = true;
+fasterSpeedText.x = (stageWidth / 2) - 150;
+fasterSpeedText.y = 310;
+fasterSpeedText.anchor.set(0.5, 0);
+app.stage.addChild(fasterSpeedText);
+
+const slowerSpeedText = new PIXI.Text('Slower', {
+    fill: '#272d37',
+    fontFamily: 'Roboto',
+    fontSize: 20,
+    align: 'center',
+});
+
+slowerSpeedText.roundPixels = true;
+slowerSpeedText.x = (stageWidth / 2) + 150;
+slowerSpeedText.y = 310;
+slowerSpeedText.anchor.set(0.5, 0);
+app.stage.addChild(slowerSpeedText);
+
+const stopBtnLabel = new PIXI.Text('Pause', {
+    fill: '#272d37',
+    fontFamily: 'Roboto',
+    fontSize: 20,
+    align: 'center',
+});
+
+stopBtnLabel.roundPixels = true;
+stopBtnLabel.x = (stageWidth / 2);
+stopBtnLabel.y = 100;
+stopBtnLabel.anchor.set(0.5, 0);
+app.stage.addChild(stopBtnLabel);
+
+const resumeBtnLabel = new PIXI.Text('Resume', {
+    fill: '#272d37',
+    fontFamily: 'Roboto',
+    fontSize: 20,
+    align: 'center',
+});
+
+resumeBtnLabel.roundPixels = true;
+resumeBtnLabel.x = (stageWidth / 2) + 200;
+resumeBtnLabel.y = 100;
+resumeBtnLabel.anchor.set(0.5, 0);
+app.stage.addChild(resumeBtnLabel);
+
+const startBtnLabel = new PIXI.Text('Start', {
+    fill: '#272d37',
+    fontFamily: 'Roboto',
+    fontSize: 20,
+    align: 'center',
+});
+
+startBtnLabel.roundPixels = true;
+startBtnLabel.x = (stageWidth / 2) - 200;
+startBtnLabel.y = 100;
+startBtnLabel.anchor.set(0.5, 0);
+app.stage.addChild(startBtnLabel);
+
+
+const restartBtnLabel = new PIXI.Text('Restart', {
+    fill: '#272d37',
+    fontFamily: 'Roboto',
+    fontSize: 20,
+    align: 'center',
+});
+
+restartBtnLabel.roundPixels = true;
+restartBtnLabel.x = (stageWidth / 2) - 200;
+restartBtnLabel.y = 100;
+restartBtnLabel.anchor.set(0.5, 0);
+app.stage.addChild(restartBtnLabel);
+restartBtnLabel.visible = false;
+
+
