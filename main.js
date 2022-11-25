@@ -46,6 +46,8 @@ var fourthTapeSquare = null;
 var fifthTapeSquare = null;
 var sixthTapeSquare = null;
 var seventhTapeSquare = null;
+const stageHeight = app.screen.height;
+const stageWidth = app.screen.width;
 var stateText = new PIXI.Text("Current State: ",
     {
         fill: "#333333",
@@ -69,25 +71,36 @@ var gameSpeedSlider = null;
 const tape_pointer = PIXI.Sprite.from('./assets/up-arrow-icon.png');
 
 
-var palindromeBtn = PIXI.Sprite.from("./assets/palindrome-button.png")
-palindromeBtn.buttonMode = true;
-palindromeBtn.anchor.set(0.5);
-palindromeBtn.position.x = 200;
-palindromeBtn.position.y = 250;
-palindromeBtn.width = 150;
-palindromeBtn.height = 50;
-palindromeBtn.interactive = true;
-palindromeBtn.on('mousedown', startPalindromeProgram);
-app.stage.addChild(palindromeBtn);
+var startBtn = PIXI.Sprite.from("./assets/start-icon.png")
+startBtn.buttonMode = true;
+startBtn.anchor.set(0.5);
+startBtn.position.x = 200;
+startBtn.position.y = 150;
+startBtn.width = 50;
+startBtn.height = 50;
+startBtn.interactive = true;
+startBtn.on('mousedown', startPalindromeProgram);
+app.stage.addChild(startBtn);
 
+var restartBtn = PIXI.Sprite.from("./assets/restart-icon-v2.png")
+restartBtn.buttonMode = true;
+restartBtn.anchor.set(0.5);
+restartBtn.position.x = 200;
+restartBtn.position.y = 150;
+restartBtn.width = 50;
+restartBtn.height = 50;
+restartBtn.interactive = true;
+restartBtn.on('mousedown', restartPalindromeProgram);
+app.stage.addChild(restartBtn);
+restartBtn.visible = false;
 
 var stopBtn = PIXI.Sprite.from("./assets/stop-icon.png")
 stopBtn.buttonMode = true;
 stopBtn.anchor.set(0.5);
 stopBtn.position.x = 400;
 stopBtn.position.y = 150;
-stopBtn.width = 150;
-stopBtn.height = 150;
+stopBtn.width = 50;
+stopBtn.height = 50;
 stopBtn.interactive = true;
 stopBtn.on('mousedown', stopProgram);
 app.stage.addChild(stopBtn);
@@ -97,70 +110,91 @@ resumeBtn.buttonMode = true;
 resumeBtn.anchor.set(0.5);
 resumeBtn.position.x = 600;
 resumeBtn.position.y = 150;
-resumeBtn.width = 150;
-resumeBtn.height = 150;
+resumeBtn.width = 50;
+resumeBtn.height = 50;
 resumeBtn.interactive = true;
 resumeBtn.on('mousedown', resumeProgram);
 app.stage.addChild(resumeBtn);
 
 var moveTapeInterval = null;
 
-function RenderSliderBunnyExample() {
-   
-}
-
 function stopProgram() {
     moveTapeInterval.pause();
+    toggleGameSpeedSliderVisible(true);
 }
 
 function resumeProgram() {
     moveTapeInterval.resume(gameSpeed);
+    toggleGameSpeedSliderVisible(false);
+}
+
+function restartPalindromeProgram() {
+    ResetGame();
+    StartTape();
+    restartBtn.visible = false;
+    restartBtnLabel.visible = false;
+}
+
+function ResetGame() {
+    // Reset tape numbers to defaults
+    const tapeNumDefaults = ["1", "0", "0", "1", "0", "0", "1"];
+
+    for (var i = 0; i < tapeSquaresArr.length; i++) {
+        // Apply the font to our text
+        tapeSquaresArr[i].text = tapeNumDefaults[i];
+
+        // Update text
+        tapeSquaresArr[i].updateText();
+    }
+
+    // Reset tape pointer to default position
+    tape_pointer.x = app.screen.width / 2 - 45;
+    tape_pointer.y = (app.screen.height / 2) + 150;
+
+    // Reset current head index and current state variables to 0 
+    currentHeadIndex = 0;
+    currentState = '0';
+
+    toggleStartBtnVisible(false);
+    toggleGameSpeedSliderVisible(false);
 }
 
 function startPalindromeProgram() {
-    SetupPalindromeTape();
     RenderTapePointer();
     RenderTapeWPixi();
     RenderStateText();
     StartTape();
-    // RenderGameSpeedSlider();
-    RenderSliderBunnyExample();
+    toggleStartBtnVisible(false);
+    toggleGameSpeedSliderVisible(false);
+    startBtnLabel.visible = false;
 }
 
-// function RenderGameSpeedSlider() {
-//     gameSpeedSlider = new PIXI.Slider({
-//         x: 600,
-//         y: 150,
-//         value: -20,
-//         width: 600,
-//         height: 8,
-//         fill: 0xda3031,
-//         stroke: 0xf9bc2e,
-//         strokeWidth: 2,
-//         controlStrokeWidth: 4,
-//         controlRadius: 24,
-//         theme: 'red',
-//         tooltip: 'Range: 0 - 100',
-//         onStart: (event, slider) => {
-//             console.log('Started', event)
-//         },
-//         onUpdate: (event, slider) => {
-//             slider.tooltip.content = slider.value
-//         },
-//         onComplete: function(event) {
-//             console.log('Completed', this)
-//         }
-//     })
-//     app.scene.addChild(gameSpeedSlider);
-// }
+function toggleStartBtnVisible(visible){
+    startBtn.visible = visible;
+}
+
+function toggleGameSpeedSliderVisible(visible){
+    handle.visible = visible;
+    slider.visible = visible;
+    gameSpeedTitle.visible = visible;
+    fasterSpeedText.visible = visible;
+    slowerSpeedText.visible = visible;
+}
+
+function toggleRestartButton(visible){
+    restartBtn.visible = visible;
+    restartBtnLabel.visible = visible;
+}
+
+
 function RenderTapePointer() {
 
 
     // center the sprite's anchor point
     tape_pointer.anchor.set(0.5);
     // move the sprite to the center of the screen
-    tape_pointer.x = app.screen.width / 2 + 5;
-    tape_pointer.y = (app.screen.height / 2) + 45;
+    tape_pointer.x = app.screen.width / 2 - 45;
+    tape_pointer.y = (app.screen.height / 2) + 150;
     tape_pointer.width = 30;
     tape_pointer.height = 30;
 
@@ -173,7 +207,7 @@ function SetupPalindromeTape() {
     secondTapeSquare = new PIXI.Text("0", { fontName: "foo" });
     thirdTapeSquare = new PIXI.Text("0", { fontName: "foo" });
     fourthTapeSquare = new PIXI.Text("1", { fontName: "foo" });
-    fifthTapeSquare = new PIXI.Text("0".toString(), { fontName: "foo" });
+    fifthTapeSquare = new PIXI.Text("0", { fontName: "foo" });
     sixthTapeSquare = new PIXI.Text("0", { fontName: "foo" });
     seventhTapeSquare = new PIXI.Text("1", { fontName: "foo" });
 
@@ -187,7 +221,7 @@ function SetupPalindromeTape() {
         style.y = app.screen.height / 2;
 
         tapeSquaresArr[i].x = app.screen.width / 2 + (i * 25);
-        tapeSquaresArr[i].y = app.screen.height / 2;
+        tapeSquaresArr[i].y = app.screen.height / 6;
 
         // Update the font style
         style.fill = 'black';
@@ -204,15 +238,16 @@ function SetupBinaryAdditionTape() {
 }
 
 function RenderStateText() {
-    stateText.x = 90;
-    stateText.y = 100;
+    stateText.x = 50;
+    stateText.y = 400;
+    
     stateText.width = 100;
     stateText.height = 50;
 
     app.stage.addChild(stateText);
 
-    stateValText.x = 190;
-    stateValText.y = 100;
+    stateValText.x = 170;
+    stateValText.y = 400;
     stateValText.width = 50;
     stateValText.height = 50;
 
@@ -221,16 +256,25 @@ function RenderStateText() {
 
 
 function RenderTapeWPixi() {
+    firstTapeSquare = new PIXI.Text("1", { fontName: "foo" });
+    secondTapeSquare = new PIXI.Text("0", { fontName: "foo" });
+    thirdTapeSquare = new PIXI.Text("0", { fontName: "foo" });
+    fourthTapeSquare = new PIXI.Text("1", { fontName: "foo" });
+    fifthTapeSquare = new PIXI.Text("0".toString(), { fontName: "foo" });
+    sixthTapeSquare = new PIXI.Text("0", { fontName: "foo" });
+    seventhTapeSquare = new PIXI.Text("1", { fontName: "foo" });
+
+    tapeSquaresArr = [firstTapeSquare, secondTapeSquare, thirdTapeSquare, fourthTapeSquare, fifthTapeSquare, sixthTapeSquare, seventhTapeSquare];
+
     const style = new PIXI.TextStyle();
 
     for (var i = 0; i < 7; i++) {
         // Apply the font to our text
-        tapeSquaresArr[i]
         style.x = app.screen.width / 2;
         style.y = app.screen.height / 2;
-
-        tapeSquaresArr[i].x = app.screen.width / 2 + (i * 25);
-        tapeSquaresArr[i].y = app.screen.height / 2;
+        console.log(app.screen.height / 2);
+        tapeSquaresArr[i].x = (app.screen.width - 100) / 2 + (i * 25);
+        tapeSquaresArr[i].y = 400;
 
         // Update the font style
         style.fill = 'black';
@@ -243,8 +287,8 @@ function RenderTapeWPixi() {
 }
 
 function moveTapeLogic() {
-    var counter = 0;
     var moveTapeDirection = ProcessInput();
+    var counter = 0;
     console.log("moveTapeDirection: " + moveTapeDirection);
     switch (moveTapeDirection) {
         case "r":
@@ -259,6 +303,7 @@ function moveTapeLogic() {
             console.log("halt-reject");
             clearInterval(moveTapeInterval);
             moveTapeInterval.clear();
+            toggleRestartButton(true);
             break;
         default:
             break;
@@ -271,18 +316,6 @@ function StartTape() {
     // moveTapeInterval = setInterval(() => {
     moveTapeInterval = new IntervalTimer(moveTapeLogic, gameSpeed);
     moveTapeInterval.start();
-}
-
-function MoveTapeInReverse() {
-    var moveTape = setInterval(() => {
-        tape_pointer.x -= 25;
-
-        if (currentHeadIndex == 0) {
-            clearInterval(moveTape);
-        }
-        currentHeadIndex--;
-
-    }, 1000);
 }
 
 function ProcessInput() {
@@ -393,8 +426,6 @@ class IntervalTimer {
     start() {
         this.clear();
         this.timerId = setInterval(() => {
-
-
             this.run();
         }, this._delay);
     }
@@ -405,8 +436,7 @@ class IntervalTimer {
     }
 }
 
-const stageHeight = app.screen.height;
-const stageWidth = app.screen.width;
+
 
 const sliderWidth = 320;
 const slider = new PIXI.Graphics()
@@ -414,7 +444,7 @@ const slider = new PIXI.Graphics()
     .drawRect(0, 0, sliderWidth, 4);
 
 slider.x = (stageWidth - sliderWidth) / 2;
-slider.y = stageHeight * 0.75;
+slider.y = stageHeight * 0.5;
 
 // Draw the handle
 const handle = new PIXI.Graphics()
@@ -432,19 +462,6 @@ handle
 
 app.stage.addChild(slider);
 slider.addChild(handle);
-
-// Add title
-const title = new PIXI.Text('Palindrome Program Turing Machine', {
-    fill: '#272d37',
-    fontFamily: 'Roboto',
-    fontSize: 20,
-    align: 'center',
-});
-title.roundPixels = true;
-title.x = stageWidth / 2;
-title.y = 40;
-title.anchor.set(0.5, 0);
-app.stage.addChild(title);
 
 function onDrag(e) {
     const halfHandleWidth = handle.width / 2;
@@ -467,3 +484,112 @@ function onDragEnd(e) {
     app.stage.interactive = false;
     // app.stage._events.removeEventListener('pointermove', onDrag);
 }
+
+
+// Add title
+const title = new PIXI.Text('Palindrome Program Turing Machine', {
+    fill: '#272d37',
+    fontFamily: 'Roboto',
+    fontSize: 20,
+    align: 'center',
+});
+title.roundPixels = true;
+title.x = stageWidth / 2;
+title.y = 40;
+title.anchor.set(0.5, 0);
+app.stage.addChild(title);
+
+const gameSpeedTitle = new PIXI.Text('Select Game Speed', {
+    fill: '#272d37',
+    fontFamily: 'Roboto',
+    fontSize: 20,
+    align: 'center',
+});
+
+gameSpeedTitle.roundPixels = true;
+gameSpeedTitle.x = stageWidth / 2;
+gameSpeedTitle.y = 250;
+gameSpeedTitle.anchor.set(0.5, 0);
+app.stage.addChild(gameSpeedTitle);
+
+const fasterSpeedText = new PIXI.Text('Faster', {
+    fill: '#272d37',
+    fontFamily: 'Roboto',
+    fontSize: 20,
+    align: 'center',
+});
+
+fasterSpeedText.roundPixels = true;
+fasterSpeedText.x = (stageWidth / 2) - 150;
+fasterSpeedText.y = 310;
+fasterSpeedText.anchor.set(0.5, 0);
+app.stage.addChild(fasterSpeedText);
+
+const slowerSpeedText = new PIXI.Text('Slower', {
+    fill: '#272d37',
+    fontFamily: 'Roboto',
+    fontSize: 20,
+    align: 'center',
+});
+
+slowerSpeedText.roundPixels = true;
+slowerSpeedText.x = (stageWidth / 2) + 150;
+slowerSpeedText.y = 310;
+slowerSpeedText.anchor.set(0.5, 0);
+app.stage.addChild(slowerSpeedText);
+
+const stopBtnLabel = new PIXI.Text('Pause', {
+    fill: '#272d37',
+    fontFamily: 'Roboto',
+    fontSize: 20,
+    align: 'center',
+});
+
+stopBtnLabel.roundPixels = true;
+stopBtnLabel.x = (stageWidth / 2);
+stopBtnLabel.y = 100;
+stopBtnLabel.anchor.set(0.5, 0);
+app.stage.addChild(stopBtnLabel);
+
+const resumeBtnLabel = new PIXI.Text('Resume', {
+    fill: '#272d37',
+    fontFamily: 'Roboto',
+    fontSize: 20,
+    align: 'center',
+});
+
+resumeBtnLabel.roundPixels = true;
+resumeBtnLabel.x = (stageWidth / 2) + 200;
+resumeBtnLabel.y = 100;
+resumeBtnLabel.anchor.set(0.5, 0);
+app.stage.addChild(resumeBtnLabel);
+
+const startBtnLabel = new PIXI.Text('Start', {
+    fill: '#272d37',
+    fontFamily: 'Roboto',
+    fontSize: 20,
+    align: 'center',
+});
+
+startBtnLabel.roundPixels = true;
+startBtnLabel.x = (stageWidth / 2) - 200;
+startBtnLabel.y = 100;
+startBtnLabel.anchor.set(0.5, 0);
+app.stage.addChild(startBtnLabel);
+
+
+const restartBtnLabel = new PIXI.Text('Restart', {
+    fill: '#272d37',
+    fontFamily: 'Roboto',
+    fontSize: 20,
+    align: 'center',
+});
+
+restartBtnLabel.roundPixels = true;
+restartBtnLabel.x = (stageWidth / 2) - 200;
+restartBtnLabel.y = 100;
+restartBtnLabel.anchor.set(0.5, 0);
+app.stage.addChild(restartBtnLabel);
+restartBtnLabel.visible = false;
+
+
