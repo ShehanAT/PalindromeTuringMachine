@@ -4,7 +4,7 @@ const app = new PIXI.Application({
 document.body.appendChild(app.view);
 const style = new PIXI.TextStyle();
 PIXI.BitmapFont.from("foo", style);
-var hardCodedState = [
+var palindromePrgStateRules = [
     // [<current_state>, <current_symbol>, <new_symbol>, <direction>, <new_state>]
     ['0', '0', '_', 'r', '1o'],
     ['0', '1', '_', 'r', '1i'],
@@ -321,20 +321,20 @@ function StartTape() {
 function ProcessInput() {
     var i = 0;
     var foundMatch = false;
-    for (i = 0; i < hardCodedState.length; i++) {
+    for (i = 0; i < palindromePrgStateRules.length; i++) {
 
         var textComparison = null;
         var currentTapeVal = null;
         if (currentHeadIndex >= tapeSquaresArr.length) {
-            textComparison = compareTapeValues(" ", hardCodedState[i][1]);
+            textComparison = compareTapeValues(" ", palindromePrgStateRules[i][1]);
             currentTapeVal = " ";
         } else {
-            textComparison = compareTapeValues(tapeSquaresArr[currentHeadIndex].text, hardCodedState[i][1]);
+            textComparison = compareTapeValues(tapeSquaresArr[currentHeadIndex].text, palindromePrgStateRules[i][1]);
             currentTapeVal = tapeSquaresArr[currentHeadIndex].text;
         }
 
-        if (textComparison && currentState == hardCodedState[i][0]) {
-            var newTapeSymbol = setNewTapeSymbol(currentTapeVal, hardCodedState[i][2]);
+        if (textComparison && currentState == palindromePrgStateRules[i][0]) {
+            var newTapeSymbol = setNewTapeSymbol(currentTapeVal, palindromePrgStateRules[i][2]);
 
             try {
                 console.log("BEFORE: tapeSquares[currentHeadIndex]: " + tapeSquaresArr[currentHeadIndex].text);
@@ -345,14 +345,14 @@ function ProcessInput() {
                 console.log("current head index is empty");
             }
 
-            currentState = hardCodedState[i][4];
-            stateValText.text = hardCodedState[i][4];
+            currentState = palindromePrgStateRules[i][4];
+            stateValText.text = palindromePrgStateRules[i][4];
             foundMatch = true;
             break;
         }
     }
     if (foundMatch) {
-        return hardCodedState[i][3];
+        return palindromePrgStateRules[i][3];
     } else {
         return "halt-reject";
     }
